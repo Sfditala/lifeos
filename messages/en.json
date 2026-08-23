@@ -14,10 +14,127 @@
     "logout": "Sign out",
     "language": "العربية",
     "themeLight": "Light mode",
-    "themeDark": "Dark mode"
+    "themeDark": "Dark mode",
+    "home": "Home",
+    "lifeAreas": "Life Areas",
+    "menu": "Menu",
+    "calendar": "Calendar",
+    "habits": "Habits",
+    "content": "Content",
+    "notes": "Notes",
+    "reviews": "Reviews"
+  },
+  "common": {
+    "add": "Add",
+    "save": "Save",
+    "cancel": "Cancel",
+    "title": "Title",
+    "name": "Name",
+    "dueDate": "Due date",
+    "targetDate": "Target date",
+    "priority": "Priority",
+    "status": "Status",
+    "lifeArea": "Life area",
+    "project": "Project",
+    "goal": "Goal",
+    "color": "Color",
+    "none": "None",
+    "export": "Export my data"
+  },
+  "status": {
+    "active": "Active",
+    "paused": "Paused",
+    "done": "Done",
+    "dropped": "Dropped",
+    "todo": "To do",
+    "doing": "Doing",
+    "idea": "Idea",
+    "draft": "Draft",
+    "scheduled": "Scheduled",
+    "published": "Published"
+  },
+  "priority": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High"
+  },
+  "areas": {
+    "goals": "Goals",
+    "projects": "Projects",
+    "tasks": "Tasks",
+    "addGoal": "Add goal",
+    "addProject": "Add project",
+    "addTask": "Add task",
+    "emptyGoals": "No goals yet",
+    "emptyProjects": "No projects yet",
+    "emptyTasks": "No tasks yet",
+    "addArea": "Add life area",
+    "emptyAreas": "No life areas yet",
+    "newAreaTitle": "New life area",
+    "newGoalTitle": "New goal",
+    "newProjectTitle": "New project",
+    "newTaskTitle": "New task"
   },
   "home": {
     "welcome": "Welcome",
-    "empty": "Home page is under construction"
+    "today": "Today's tasks",
+    "overdue": "Overdue tasks",
+    "upcoming": "Upcoming dates",
+    "noTasksToday": "No tasks for today",
+    "noOverdue": "No overdue tasks",
+    "noUpcoming": "No upcoming dates",
+    "quickAddPlaceholder": "Add a quick task..."
+  },
+  "habits": {
+    "title": "Habits",
+    "streak": "streak",
+    "days": "days",
+    "addHabit": "Add habit",
+    "newHabitTitle": "New habit",
+    "frequency": "Frequency",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "empty": "No habits yet",
+    "today": "Today"
+  },
+  "content": {
+    "title": "Content",
+    "addItem": "Add content idea",
+    "newItemTitle": "New content idea",
+    "empty": "No content yet"
+  },
+  "notes": {
+    "title": "Notes",
+    "addNote": "Add note",
+    "newNoteTitle": "New note",
+    "body": "Body",
+    "search": "Search notes...",
+    "empty": "No notes yet",
+    "noResults": "No matching results"
+  },
+  "reviews": {
+    "title": "Reviews",
+    "daily": "Daily review",
+    "weekly": "Weekly review",
+    "newDaily": "New daily review",
+    "newWeekly": "New weekly review",
+    "periodStart": "From",
+    "periodEnd": "To",
+    "summary": "Summary",
+    "win": "Biggest win",
+    "blocker": "Biggest blocker",
+    "conflict": "Conflict between areas",
+    "priority_next": "Priorities for next period",
+    "completedToday": "Tasks completed today",
+    "overdueToday": "Overdue tasks",
+    "empty": "No reviews yet",
+    "save": "Save review"
+  },
+  "calendar": {
+    "title": "Unified calendar",
+    "empty": "No items on this day",
+    "task": "Task",
+    "goal": "Goal",
+    "content": "Content"
   }
 }

@@ -14,10 +14,127 @@
     "logout": "تسجيل خروج",
     "language": "English",
     "themeLight": "الوضع الفاتح",
-    "themeDark": "الوضع الداكن"
+    "themeDark": "الوضع الداكن",
+    "home": "الرئيسية",
+    "lifeAreas": "مجالات الحياة",
+    "menu": "القائمة",
+    "calendar": "التقويم",
+    "habits": "العادات",
+    "content": "المحتوى",
+    "notes": "الملاحظات",
+    "reviews": "المراجعات"
+  },
+  "common": {
+    "add": "إضافة",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "title": "العنوان",
+    "name": "الاسم",
+    "dueDate": "تاريخ الاستحقاق",
+    "targetDate": "التاريخ المستهدف",
+    "priority": "الأولوية",
+    "status": "الحالة",
+    "lifeArea": "مجال الحياة",
+    "project": "المشروع",
+    "goal": "الهدف",
+    "color": "اللون",
+    "none": "بدون",
+    "export": "تصدير بياناتي"
+  },
+  "status": {
+    "active": "نشط",
+    "paused": "متوقف",
+    "done": "منجز",
+    "dropped": "متروك",
+    "todo": "للعمل",
+    "doing": "جارِ العمل",
+    "idea": "فكرة",
+    "draft": "مسودة",
+    "scheduled": "مجدول",
+    "published": "منشور"
+  },
+  "priority": {
+    "low": "منخفضة",
+    "medium": "متوسطة",
+    "high": "عالية"
+  },
+  "areas": {
+    "goals": "الأهداف",
+    "projects": "المشاريع",
+    "tasks": "المهام",
+    "addGoal": "إضافة هدف",
+    "addProject": "إضافة مشروع",
+    "addTask": "إضافة مهمة",
+    "emptyGoals": "لا يوجد أهداف بعد",
+    "emptyProjects": "لا يوجد مشاريع بعد",
+    "emptyTasks": "لا يوجد مهام بعد",
+    "addArea": "إضافة مجال حياة",
+    "emptyAreas": "لا يوجد مجالات حياة بعد",
+    "newAreaTitle": "مجال حياة جديد",
+    "newGoalTitle": "هدف جديد",
+    "newProjectTitle": "مشروع جديد",
+    "newTaskTitle": "مهمة جديدة"
   },
   "home": {
     "welcome": "أهلاً بك",
-    "empty": "الصفحة الرئيسية قيد الإنشاء"
+    "today": "مهام اليوم",
+    "overdue": "المهام المتأخرة",
+    "upcoming": "أقرب المواعيد",
+    "noTasksToday": "لا يوجد مهام لليوم",
+    "noOverdue": "لا يوجد مهام متأخرة",
+    "noUpcoming": "لا يوجد مواعيد قادمة",
+    "quickAddPlaceholder": "أضف مهمة سريعة..."
+  },
+  "habits": {
+    "title": "العادات",
+    "streak": "متتالية",
+    "days": "يوم",
+    "addHabit": "إضافة عادة",
+    "newHabitTitle": "عادة جديدة",
+    "frequency": "التكرار",
+    "daily": "يومي",
+    "weekly": "أسبوعي",
+    "empty": "لا يوجد عادات بعد",
+    "today": "اليوم"
+  },
+  "content": {
+    "title": "المحتوى",
+    "addItem": "إضافة فكرة محتوى",
+    "newItemTitle": "فكرة محتوى جديدة",
+    "empty": "لا يوجد محتوى بعد"
+  },
+  "notes": {
+    "title": "الملاحظات",
+    "addNote": "إضافة ملاحظة",
+    "newNoteTitle": "ملاحظة جديدة",
+    "body": "النص",
+    "search": "بحث بالملاحظات...",
+    "empty": "لا يوجد ملاحظات بعد",
+    "noResults": "لا نتائج مطابقة"
+  },
+  "reviews": {
+    "title": "المراجعات",
+    "daily": "مراجعة يومية",
+    "weekly": "مراجعة أسبوعية",
+    "newDaily": "مراجعة يومية جديدة",
+    "newWeekly": "مراجعة أسبوعية جديدة",
+    "periodStart": "من تاريخ",
+    "periodEnd": "إلى تاريخ",
+    "summary": "الملخص",
+    "win": "أهم إنجاز",
+    "blocker": "أهم عائق",
+    "conflict": "تعارض بين مجالين",
+    "priority_next": "أولويات الفترة القادمة",
+    "completedToday": "مهام منجزة اليوم",
+    "overdueToday": "مهام متأخرة",
+    "empty": "لا يوجد مراجعات بعد",
+    "save": "حفظ المراجعة"
+  },
+  "calendar": {
+    "title": "التقويم الموحّد",
+    "empty": "لا يوجد عناصر لهذا اليوم",
+    "task": "مهمة",
+    "goal": "هدف",
+    "content": "محتوى"
   }
 }
