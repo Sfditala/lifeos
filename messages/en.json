@@ -1,0 +1,23 @@
+{
+  "app": {
+    "name": "Life OS"
+  },
+  "login": {
+    "title": "Sign in",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "loading": "Signing in...",
+    "error": "Invalid email or password"
+  },
+  "nav": {
+    "logout": "Sign out",
+    "language": "العربية",
+    "themeLight": "Light mode",
+    "themeDark": "Dark mode"
+  },
+  "home": {
+    "welcome": "Welcome",
+    "empty": "Home page is under construction"
+  }
+}
