@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Users, FileBox } from "lucide-react";
+import { Users, FileBox, Target, FolderKanban, ListTodo, StickyNote } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import {
   Tabs,
@@ -9,7 +9,6 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { TaskCheckbox } from "@/components/task-checkbox";
 import { StatusBadge, PriorityBadge } from "@/components/status-badge";
 import { AddGoalDialog } from "@/components/add-goal-dialog";
@@ -17,21 +16,27 @@ import { AddProjectDialog } from "@/components/add-project-dialog";
 import { AddTaskDialog } from "@/components/add-task-dialog";
 import { AddNoteDialog } from "@/components/add-note-dialog";
 import { EmptyState } from "@/components/empty-state";
-import {
-  Target,
-  FolderKanban,
-  ListTodo,
-  StickyNote,
-} from "lucide-react";
+import { RowMenu } from "@/components/row-menu";
+import { deleteGoal, deleteProject, deleteTask, deleteNote } from "@/lib/actions";
 
 type Goal = { id: string; title: string; status: string; target_date: string | null };
-type Project = { id: string; name: string; status: string };
+type Project = {
+  id: string;
+  name: string;
+  description: string | null;
+  status: string;
+  due_date: string | null;
+  goal_id: string | null;
+  taskCount: number;
+  milestoneCount: number;
+};
 type Task = {
   id: string;
   title: string;
   status: string;
   priority: string;
   due_date: string | null;
+  project_id: string | null;
 };
 type Note = { id: string; title: string; body: string };
 
@@ -55,11 +60,13 @@ export function AreaTabs({
   };
 }) {
   const t = useTranslations("areas");
+  const tCommon = useTranslations("common");
 
   return (
     <Tabs defaultValue="overview">
       <TabsList variant="line" className="mb-6 w-full justify-start overflow-x-auto">
         <TabsTrigger value="overview">{t("overview")}</TabsTrigger>
+        <TabsTrigger value="goals">{t("goals")}</TabsTrigger>
         <TabsTrigger value="projects">{t("projects")}</TabsTrigger>
         <TabsTrigger value="tasks">{t("tasks")}</TabsTrigger>
         <TabsTrigger value="notes">{t("notes")}</TabsTrigger>
@@ -92,6 +99,48 @@ export function AreaTabs({
         </div>
       </TabsContent>
 
+      <TabsContent value="goals">
+        <div className="mb-3 flex justify-end">
+          <AddGoalDialog lifeAreaId={areaId} />
+        </div>
+        {goals.length > 0 ? (
+          <ul className="divide-y divide-border rounded-lg border border-border">
+            {goals.map((goal) => (
+              <li key={goal.id} className="flex items-center gap-3 px-4 py-3">
+                <span className="flex-1 text-sm text-foreground">
+                  {goal.title}
+                </span>
+                {goal.target_date && (
+                  <span className="text-xs text-muted-foreground">
+                    {goal.target_date}
+                  </span>
+                )}
+                <StatusBadge status={goal.status} />
+                <RowMenu
+                  deleteTitle={tCommon("confirmDeleteTitle")}
+                  deleteImpact={tCommon("deleteSimpleImpact")}
+                  onDelete={() => deleteGoal(goal.id)}
+                  renderEdit={(open, onOpenChange) => (
+                    <AddGoalDialog
+                      lifeAreaId={areaId}
+                      initial={goal}
+                      open={open}
+                      onOpenChange={onOpenChange}
+                    />
+                  )}
+                />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <EmptyState
+            icon={Target}
+            message={t("emptyGoals")}
+            action={<AddGoalDialog lifeAreaId={areaId} />}
+          />
+        )}
+      </TabsContent>
+
       <TabsContent value="projects">
         <div className="mb-3 flex justify-end">
           <AddProjectDialog
@@ -102,14 +151,37 @@ export function AreaTabs({
         {projects.length > 0 ? (
           <ul className="divide-y divide-border rounded-lg border border-border">
             {projects.map((project) => (
-              <li key={project.id}>
+              <li key={project.id} className="flex items-center">
                 <Link
                   href={`/areas/${areaId}/projects/${project.id}`}
-                  className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-accent"
+                  className="flex flex-1 items-center justify-between gap-3 px-4 py-3 hover:bg-accent"
                 >
                   <span className="text-sm text-foreground">{project.name}</span>
                   <StatusBadge status={project.status} />
                 </Link>
+                <div className="pe-2">
+                  <RowMenu
+                    deleteTitle={tCommon("confirmDeleteTitle")}
+                    deleteImpact={
+                      project.taskCount > 0 || project.milestoneCount > 0
+                        ? tCommon("deleteProjectImpact", {
+                            tasks: project.taskCount,
+                            milestones: project.milestoneCount,
+                          })
+                        : tCommon("deleteSimpleImpact")
+                    }
+                    onDelete={() => deleteProject(project.id)}
+                    renderEdit={(open, onOpenChange) => (
+                      <AddProjectDialog
+                        lifeAreaId={areaId}
+                        goals={goals.map((g) => ({ id: g.id, title: g.title }))}
+                        initial={project}
+                        open={open}
+                        onOpenChange={onOpenChange}
+                      />
+                    )}
+                  />
+                </div>
               </li>
             ))}
           </ul>
@@ -148,6 +220,20 @@ export function AreaTabs({
                   </span>
                 )}
                 <PriorityBadge priority={task.priority} />
+                <RowMenu
+                  deleteTitle={tCommon("confirmDeleteTitle")}
+                  deleteImpact={tCommon("deleteSimpleImpact")}
+                  onDelete={() => deleteTask(task.id)}
+                  renderEdit={(open, onOpenChange) => (
+                    <AddTaskDialog
+                      lifeAreaId={areaId}
+                      projects={projects.map((p) => ({ id: p.id, name: p.name }))}
+                      initial={task}
+                      open={open}
+                      onOpenChange={onOpenChange}
+                    />
+                  )}
+                />
               </li>
             ))}
           </ul>
@@ -174,9 +260,24 @@ export function AreaTabs({
             {notes.map((note) => (
               <li
                 key={note.id}
-                className="rounded-lg border border-border bg-card p-4"
+                className="relative rounded-lg border border-border bg-card p-4"
               >
-                <h3 className="mb-1 text-sm font-semibold text-foreground">
+                <div className="absolute top-2 end-2">
+                  <RowMenu
+                    deleteTitle={tCommon("confirmDeleteTitle")}
+                    deleteImpact={tCommon("deleteSimpleImpact")}
+                    onDelete={() => deleteNote(note.id)}
+                    renderEdit={(open, onOpenChange) => (
+                      <AddNoteDialog
+                        lifeAreaId={areaId}
+                        initial={note}
+                        open={open}
+                        onOpenChange={onOpenChange}
+                      />
+                    )}
+                  />
+                </div>
+                <h3 className="mb-1 pe-6 text-sm font-semibold text-foreground">
                   {note.title}
                 </h3>
                 <p className="line-clamp-3 text-sm text-muted-foreground">

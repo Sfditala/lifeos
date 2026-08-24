@@ -33,6 +33,48 @@ export async function createLifeArea(formData: FormData) {
   revalidatePath("/", "layout");
 }
 
+export async function updateLifeArea(areaId: string, formData: FormData) {
+  const { supabase } = await requireUserId();
+  const name = str(formData, "name");
+  const color = str(formData, "color");
+  if (!name) throw new Error("Name is required");
+
+  const { error } = await supabase
+    .from("life_areas")
+    .update({ name, color })
+    .eq("id", areaId);
+  if (error) throw error;
+
+  revalidatePath("/", "layout");
+}
+
+export async function deleteLifeArea(areaId: string) {
+  const { supabase } = await requireUserId();
+  const now = new Date().toISOString();
+
+  const { error: projectsError } = await supabase
+    .from("projects")
+    .update({ deleted_at: now })
+    .eq("life_area_id", areaId)
+    .is("deleted_at", null);
+  if (projectsError) throw projectsError;
+
+  const { error: tasksError } = await supabase
+    .from("tasks")
+    .update({ deleted_at: now })
+    .eq("life_area_id", areaId)
+    .is("deleted_at", null);
+  if (tasksError) throw tasksError;
+
+  const { error } = await supabase
+    .from("life_areas")
+    .update({ deleted_at: now })
+    .eq("id", areaId);
+  if (error) throw error;
+
+  revalidatePath("/", "layout");
+}
+
 // --- Goals ---
 
 export async function createGoal(formData: FormData) {
@@ -58,6 +100,31 @@ export async function updateGoalStatus(goalId: string, status: string) {
   const { error } = await supabase
     .from("goals")
     .update({ status })
+    .eq("id", goalId);
+  if (error) throw error;
+  revalidatePath("/", "layout");
+}
+
+export async function updateGoal(goalId: string, formData: FormData) {
+  const { supabase } = await requireUserId();
+  const title = str(formData, "title");
+  const targetDate = str(formData, "target_date");
+  if (!title) throw new Error("Title is required");
+
+  const { error } = await supabase
+    .from("goals")
+    .update({ title, target_date: targetDate })
+    .eq("id", goalId);
+  if (error) throw error;
+
+  revalidatePath("/", "layout");
+}
+
+export async function deleteGoal(goalId: string) {
+  const { supabase } = await requireUserId();
+  const { error } = await supabase
+    .from("goals")
+    .update({ deleted_at: new Date().toISOString() })
     .eq("id", goalId);
   if (error) throw error;
   revalidatePath("/", "layout");
@@ -94,6 +161,50 @@ export async function updateProjectStatus(projectId: string, status: string) {
     .update({ status })
     .eq("id", projectId);
   if (error) throw error;
+  revalidatePath("/", "layout");
+}
+
+export async function updateProject(projectId: string, formData: FormData) {
+  const { supabase } = await requireUserId();
+  const name = str(formData, "name");
+  const description = str(formData, "description");
+  const dueDate = str(formData, "due_date");
+  const goalId = str(formData, "goal_id");
+  if (!name) throw new Error("Name is required");
+
+  const { error } = await supabase
+    .from("projects")
+    .update({ name, description, due_date: dueDate, goal_id: goalId })
+    .eq("id", projectId);
+  if (error) throw error;
+
+  revalidatePath("/", "layout");
+}
+
+export async function deleteProject(projectId: string) {
+  const { supabase } = await requireUserId();
+  const now = new Date().toISOString();
+
+  const { error: tasksError } = await supabase
+    .from("tasks")
+    .update({ deleted_at: now })
+    .eq("project_id", projectId)
+    .is("deleted_at", null);
+  if (tasksError) throw tasksError;
+
+  const { error: milestonesError } = await supabase
+    .from("project_milestones")
+    .update({ deleted_at: now })
+    .eq("project_id", projectId)
+    .is("deleted_at", null);
+  if (milestonesError) throw milestonesError;
+
+  const { error } = await supabase
+    .from("projects")
+    .update({ deleted_at: now })
+    .eq("id", projectId);
+  if (error) throw error;
+
   revalidatePath("/", "layout");
 }
 
@@ -144,6 +255,38 @@ export async function archiveTask(taskId: string) {
   revalidatePath("/", "layout");
 }
 
+export async function updateTask(taskId: string, formData: FormData) {
+  const { supabase } = await requireUserId();
+  const title = str(formData, "title");
+  const dueDate = str(formData, "due_date");
+  const priority = str(formData, "priority") ?? "medium";
+  const projectId = str(formData, "project_id");
+  if (!title) throw new Error("Title is required");
+
+  const { error } = await supabase
+    .from("tasks")
+    .update({
+      title,
+      due_date: dueDate,
+      priority,
+      project_id: projectId,
+    })
+    .eq("id", taskId);
+  if (error) throw error;
+
+  revalidatePath("/", "layout");
+}
+
+export async function deleteTask(taskId: string) {
+  const { supabase } = await requireUserId();
+  const { error } = await supabase
+    .from("tasks")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", taskId);
+  if (error) throw error;
+  revalidatePath("/", "layout");
+}
+
 // --- Habits ---
 
 export async function createHabit(formData: FormData) {
@@ -188,6 +331,31 @@ export async function toggleHabitToday(habitId: string, done: boolean) {
   revalidatePath("/habits", "layout");
 }
 
+export async function updateHabit(habitId: string, formData: FormData) {
+  const { supabase } = await requireUserId();
+  const name = str(formData, "name");
+  const frequency = str(formData, "frequency") ?? "daily";
+  if (!name) throw new Error("Name is required");
+
+  const { error } = await supabase
+    .from("habits")
+    .update({ name, frequency })
+    .eq("id", habitId);
+  if (error) throw error;
+
+  revalidatePath("/habits", "layout");
+}
+
+export async function deleteHabit(habitId: string) {
+  const { supabase } = await requireUserId();
+  const { error } = await supabase
+    .from("habits")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", habitId);
+  if (error) throw error;
+  revalidatePath("/habits", "layout");
+}
+
 // --- Content ---
 
 export async function createContentItem(formData: FormData) {
@@ -218,6 +386,31 @@ export async function updateContentStatus(itemId: string, status: string) {
   revalidatePath("/content", "layout");
 }
 
+export async function updateContentItem(itemId: string, formData: FormData) {
+  const { supabase } = await requireUserId();
+  const title = str(formData, "title");
+  const projectId = str(formData, "project_id");
+  if (!title) throw new Error("Title is required");
+
+  const { error } = await supabase
+    .from("content_items")
+    .update({ title, project_id: projectId })
+    .eq("id", itemId);
+  if (error) throw error;
+
+  revalidatePath("/content", "layout");
+}
+
+export async function deleteContentItem(itemId: string) {
+  const { supabase } = await requireUserId();
+  const { error } = await supabase
+    .from("content_items")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", itemId);
+  if (error) throw error;
+  revalidatePath("/content", "layout");
+}
+
 // --- Knowledge notes ---
 
 export async function createNote(formData: FormData) {
@@ -235,6 +428,31 @@ export async function createNote(formData: FormData) {
   });
   if (error) throw error;
 
+  revalidatePath("/", "layout");
+}
+
+export async function updateNote(noteId: string, formData: FormData) {
+  const { supabase } = await requireUserId();
+  const title = str(formData, "title");
+  const body = str(formData, "body");
+  if (!title || !body) throw new Error("Missing fields");
+
+  const { error } = await supabase
+    .from("knowledge_notes")
+    .update({ title, body, updated_at: new Date().toISOString() })
+    .eq("id", noteId);
+  if (error) throw error;
+
+  revalidatePath("/", "layout");
+}
+
+export async function deleteNote(noteId: string) {
+  const { supabase } = await requireUserId();
+  const { error } = await supabase
+    .from("knowledge_notes")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", noteId);
+  if (error) throw error;
   revalidatePath("/", "layout");
 }
 
@@ -303,6 +521,65 @@ export async function toggleMilestoneDone(milestoneId: string, done: boolean) {
     .from("project_milestones")
     .update({ done })
     .eq("id", milestoneId);
+  if (error) throw error;
+  revalidatePath("/", "layout");
+}
+
+export async function updateMilestone(milestoneId: string, formData: FormData) {
+  const { supabase } = await requireUserId();
+  const title = str(formData, "title");
+  const dueDate = str(formData, "due_date");
+  if (!title) throw new Error("Title is required");
+
+  const { error } = await supabase
+    .from("project_milestones")
+    .update({ title, due_date: dueDate })
+    .eq("id", milestoneId);
+  if (error) throw error;
+
+  revalidatePath("/", "layout");
+}
+
+export async function deleteMilestone(milestoneId: string) {
+  const { supabase } = await requireUserId();
+  const { error } = await supabase
+    .from("project_milestones")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", milestoneId);
+  if (error) throw error;
+  revalidatePath("/", "layout");
+}
+
+// --- Trash ---
+
+const TRASH_TABLES = [
+  "life_areas",
+  "goals",
+  "projects",
+  "tasks",
+  "habits",
+  "content_items",
+  "knowledge_notes",
+  "project_milestones",
+] as const;
+
+type TrashTable = (typeof TRASH_TABLES)[number];
+
+export async function restoreFromTrash(table: TrashTable, id: string) {
+  const { supabase } = await requireUserId();
+  if (!TRASH_TABLES.includes(table)) throw new Error("Invalid table");
+  const { error } = await supabase
+    .from(table)
+    .update({ deleted_at: null })
+    .eq("id", id);
+  if (error) throw error;
+  revalidatePath("/", "layout");
+}
+
+export async function purgeFromTrash(table: TrashTable, id: string) {
+  const { supabase } = await requireUserId();
+  if (!TRASH_TABLES.includes(table)) throw new Error("Invalid table");
+  const { error } = await supabase.from(table).delete().eq("id", id);
   if (error) throw error;
   revalidatePath("/", "layout");
 }

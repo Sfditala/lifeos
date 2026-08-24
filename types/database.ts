@@ -42,6 +42,7 @@ export type Database = {
       content_items: {
         Row: {
           created_at: string | null
+          deleted_at: string | null
           id: string
           life_area_id: string | null
           notes: string | null
@@ -53,6 +54,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          deleted_at?: string | null
           id?: string
           life_area_id?: string | null
           notes?: string | null
@@ -64,6 +66,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          deleted_at?: string | null
           id?: string
           life_area_id?: string | null
           notes?: string | null
@@ -135,6 +138,7 @@ export type Database = {
       goals: {
         Row: {
           created_at: string | null
+          deleted_at: string | null
           description: string | null
           id: string
           life_area_id: string | null
@@ -145,6 +149,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          deleted_at?: string | null
           description?: string | null
           id?: string
           life_area_id?: string | null
@@ -155,6 +160,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          deleted_at?: string | null
           description?: string | null
           id?: string
           life_area_id?: string | null
@@ -212,6 +218,7 @@ export type Database = {
         Row: {
           active: boolean
           created_at: string | null
+          deleted_at: string | null
           frequency: string
           id: string
           life_area_id: string | null
@@ -221,6 +228,7 @@ export type Database = {
         Insert: {
           active?: boolean
           created_at?: string | null
+          deleted_at?: string | null
           frequency?: string
           id?: string
           life_area_id?: string | null
@@ -230,6 +238,7 @@ export type Database = {
         Update: {
           active?: boolean
           created_at?: string | null
+          deleted_at?: string | null
           frequency?: string
           id?: string
           life_area_id?: string | null
@@ -250,6 +259,7 @@ export type Database = {
         Row: {
           body: string
           created_at: string | null
+          deleted_at: string | null
           id: string
           life_area_id: string | null
           tags: string[] | null
@@ -260,6 +270,7 @@ export type Database = {
         Insert: {
           body: string
           created_at?: string | null
+          deleted_at?: string | null
           id?: string
           life_area_id?: string | null
           tags?: string[] | null
@@ -270,6 +281,7 @@ export type Database = {
         Update: {
           body?: string
           created_at?: string | null
+          deleted_at?: string | null
           id?: string
           life_area_id?: string | null
           tags?: string[] | null
@@ -291,6 +303,7 @@ export type Database = {
         Row: {
           color: string | null
           created_at: string | null
+          deleted_at: string | null
           id: string
           name: string
           sort_order: number | null
@@ -299,6 +312,7 @@ export type Database = {
         Insert: {
           color?: string | null
           created_at?: string | null
+          deleted_at?: string | null
           id?: string
           name: string
           sort_order?: number | null
@@ -307,6 +321,7 @@ export type Database = {
         Update: {
           color?: string | null
           created_at?: string | null
+          deleted_at?: string | null
           id?: string
           name?: string
           sort_order?: number | null
@@ -317,6 +332,7 @@ export type Database = {
       project_milestones: {
         Row: {
           created_at: string | null
+          deleted_at: string | null
           done: boolean
           due_date: string | null
           id: string
@@ -327,6 +343,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          deleted_at?: string | null
           done?: boolean
           due_date?: string | null
           id?: string
@@ -337,6 +354,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          deleted_at?: string | null
           done?: boolean
           due_date?: string | null
           id?: string
@@ -358,6 +376,7 @@ export type Database = {
       projects: {
         Row: {
           created_at: string | null
+          deleted_at: string | null
           description: string | null
           due_date: string | null
           goal_id: string | null
@@ -369,6 +388,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          deleted_at?: string | null
           description?: string | null
           due_date?: string | null
           goal_id?: string | null
@@ -380,6 +400,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          deleted_at?: string | null
           description?: string | null
           due_date?: string | null
           goal_id?: string | null
@@ -469,6 +490,7 @@ export type Database = {
         Row: {
           completed_at: string | null
           created_at: string | null
+          deleted_at: string | null
           due_date: string | null
           id: string
           life_area_id: string
@@ -482,6 +504,7 @@ export type Database = {
         Insert: {
           completed_at?: string | null
           created_at?: string | null
+          deleted_at?: string | null
           due_date?: string | null
           id?: string
           life_area_id: string
@@ -495,6 +518,7 @@ export type Database = {
         Update: {
           completed_at?: string | null
           created_at?: string | null
+          deleted_at?: string | null
           due_date?: string | null
           id?: string
           life_area_id?: string

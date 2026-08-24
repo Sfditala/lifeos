@@ -3,7 +3,7 @@
 import { useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { Plus } from "lucide-react";
-import { createTask } from "@/lib/actions";
+import { createTask, updateTask } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,18 +17,34 @@ import {
 } from "@/components/ui/dialog";
 
 type Project = { id: string; name: string };
+type Initial = {
+  id: string;
+  title: string;
+  due_date: string | null;
+  priority: string;
+  project_id: string | null;
+};
 
 export function AddTaskDialog({
   lifeAreaId,
   projects,
+  initial,
+  open: controlledOpen,
+  onOpenChange: setControlledOpen,
 }: {
   lifeAreaId: string;
   projects: Project[];
+  initial?: Initial;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const t = useTranslations("areas");
   const tCommon = useTranslations("common");
   const tPriority = useTranslations("priority");
-  const [open, setOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = isControlled ? setControlledOpen! : setInternalOpen;
   const [pending, setPending] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -37,7 +53,11 @@ export function AddTaskDialog({
     if (!formRef.current) return;
     setPending(true);
     const formData = new FormData(formRef.current);
-    await createTask(formData);
+    if (initial) {
+      await updateTask(initial.id, formData);
+    } else {
+      await createTask(formData);
+    }
     setPending(false);
     setOpen(false);
     formRef.current.reset();
@@ -45,31 +65,46 @@ export function AddTaskDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button variant="outline" size="sm" />}>
-        <Plus className="h-4 w-4" />
-        {t("addTask")}
-      </DialogTrigger>
+      {!initial && (
+        <DialogTrigger render={<Button variant="outline" size="sm" />}>
+          <Plus className="h-4 w-4" />
+          {t("addTask")}
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("newTaskTitle")}</DialogTitle>
+          <DialogTitle>
+            {initial ? tCommon("edit") : t("newTaskTitle")}
+          </DialogTitle>
         </DialogHeader>
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
           <input type="hidden" name="life_area_id" value={lifeAreaId} />
           <div className="space-y-1">
             <Label htmlFor="task-title">{tCommon("title")}</Label>
-            <Input id="task-title" name="title" required autoFocus />
+            <Input
+              id="task-title"
+              name="title"
+              required
+              autoFocus
+              defaultValue={initial?.title}
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label htmlFor="due_date">{tCommon("dueDate")}</Label>
-              <Input id="due_date" name="due_date" type="date" />
+              <Input
+                id="due_date"
+                name="due_date"
+                type="date"
+                defaultValue={initial?.due_date ?? undefined}
+              />
             </div>
             <div className="space-y-1">
               <Label htmlFor="priority">{tCommon("priority")}</Label>
               <select
                 id="priority"
                 name="priority"
-                defaultValue="medium"
+                defaultValue={initial?.priority ?? "medium"}
                 className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
               >
                 <option value="low">{tPriority("low")}</option>
@@ -84,7 +119,7 @@ export function AddTaskDialog({
               <select
                 id="project_id"
                 name="project_id"
-                defaultValue=""
+                defaultValue={initial?.project_id ?? ""}
                 className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
               >
                 <option value="">{tCommon("none")}</option>

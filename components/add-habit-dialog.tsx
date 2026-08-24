@@ -3,7 +3,7 @@
 import { useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { Plus } from "lucide-react";
-import { createHabit } from "@/lib/actions";
+import { createHabit, updateHabit } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,10 +16,23 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-export function AddHabitDialog() {
+type Initial = { id: string; name: string; frequency: string };
+
+export function AddHabitDialog({
+  initial,
+  open: controlledOpen,
+  onOpenChange: setControlledOpen,
+}: {
+  initial?: Initial;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+} = {}) {
   const t = useTranslations("habits");
   const tCommon = useTranslations("common");
-  const [open, setOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = isControlled ? setControlledOpen! : setInternalOpen;
   const [pending, setPending] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -28,7 +41,11 @@ export function AddHabitDialog() {
     if (!formRef.current) return;
     setPending(true);
     const formData = new FormData(formRef.current);
-    await createHabit(formData);
+    if (initial) {
+      await updateHabit(initial.id, formData);
+    } else {
+      await createHabit(formData);
+    }
     setPending(false);
     setOpen(false);
     formRef.current.reset();
@@ -36,25 +53,35 @@ export function AddHabitDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button size="sm" />}>
-        <Plus className="h-4 w-4" />
-        {t("addHabit")}
-      </DialogTrigger>
+      {!initial && (
+        <DialogTrigger render={<Button size="sm" />}>
+          <Plus className="h-4 w-4" />
+          {t("addHabit")}
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("newHabitTitle")}</DialogTitle>
+          <DialogTitle>
+            {initial ? tCommon("edit") : t("newHabitTitle")}
+          </DialogTitle>
         </DialogHeader>
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
             <Label htmlFor="habit-name">{tCommon("name")}</Label>
-            <Input id="habit-name" name="name" required autoFocus />
+            <Input
+              id="habit-name"
+              name="name"
+              required
+              autoFocus
+              defaultValue={initial?.name}
+            />
           </div>
           <div className="space-y-1">
             <Label htmlFor="frequency">{t("frequency")}</Label>
             <select
               id="frequency"
               name="frequency"
-              defaultValue="daily"
+              defaultValue={initial?.frequency ?? "daily"}
               className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
             >
               <option value="daily">{t("daily")}</option>

@@ -40,7 +40,25 @@
     "color": "اللون",
     "none": "بدون",
     "export": "تصدير بياناتي",
-    "description": "الوصف"
+    "description": "الوصف",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "more": "المزيد",
+    "confirmDeleteTitle": "متأكد من الحذف؟",
+    "deleteAreaImpact": "سيُنقَل معه {projects} مشروع و{tasks} مهمة تابعين لهذا المجال إلى سلة المحذوفات. يمكنك الاسترجاع خلال 30 يوم.",
+    "deleteProjectImpact": "سيُنقَل معه {tasks} مهمة و{milestones} معلم تابعين لهذا المشروع إلى سلة المحذوفات. يمكنك الاسترجاع خلال 30 يوم.",
+    "deleteSimpleImpact": "سينتقل إلى سلة المحذوفات، وتقدر تسترجعه خلال 30 يوم.",
+    "trash": "سلة المحذوفات"
+  },
+  "trash": {
+    "title": "سلة المحذوفات",
+    "empty": "سلة المحذوفات فاضية",
+    "deletedDaysAgo": "محذوف قبل {days} يوم",
+    "autoPurgeIn": "حذف نهائي تلقائي بعد {days} يوم",
+    "restore": "استرجاع",
+    "deleteForever": "حذف نهائي",
+    "confirmForeverTitle": "حذف نهائي — بدون رجعة",
+    "confirmForeverMessage": "هذا الإجراء نهائي ولا يمكن التراجع عنه أبدًا."
   },
   "status": {
     "active": "نشط",

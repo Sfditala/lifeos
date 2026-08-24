@@ -20,18 +20,21 @@ export default async function HomePage() {
     supabase
       .from("tasks")
       .select("id, title, priority, status, due_date")
+      .is("deleted_at", null)
       .eq("due_date", today)
       .neq("status", "done")
       .order("priority", { ascending: false }),
     supabase
       .from("tasks")
       .select("id, title, priority, status, due_date")
+      .is("deleted_at", null)
       .lt("due_date", today)
       .neq("status", "done")
       .order("due_date", { ascending: true }),
     supabase
       .from("goals")
       .select("id, title, target_date")
+      .is("deleted_at", null)
       .eq("status", "active")
       .gte("target_date", today)
       .order("target_date", { ascending: true })
@@ -39,6 +42,7 @@ export default async function HomePage() {
     supabase
       .from("life_areas")
       .select("id, name")
+      .is("deleted_at", null)
       .order("sort_order", { ascending: true }),
   ]);
 

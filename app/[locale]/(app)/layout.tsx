@@ -1,4 +1,4 @@
-import { Download, LayoutDashboard } from "lucide-react";
+import { Download, LayoutDashboard, Trash2 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -10,11 +10,37 @@ import { LogoutButton } from "@/components/logout-button";
 
 async function getLifeAreas() {
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("life_areas")
-    .select("id, name, color")
-    .order("sort_order", { ascending: true });
-  return data ?? [];
+  const [{ data: areas }, { data: projects }, { data: tasks }] =
+    await Promise.all([
+      supabase
+        .from("life_areas")
+        .select("id, name, color")
+        .is("deleted_at", null)
+        .order("sort_order", { ascending: true }),
+      supabase
+        .from("projects")
+        .select("life_area_id")
+        .is("deleted_at", null),
+      supabase.from("tasks").select("life_area_id").is("deleted_at", null),
+    ]);
+
+  const projectCounts = new Map<string, number>();
+  for (const p of projects ?? []) {
+    projectCounts.set(
+      p.life_area_id,
+      (projectCounts.get(p.life_area_id) ?? 0) + 1,
+    );
+  }
+  const taskCounts = new Map<string, number>();
+  for (const t of tasks ?? []) {
+    taskCounts.set(t.life_area_id, (taskCounts.get(t.life_area_id) ?? 0) + 1);
+  }
+
+  return (areas ?? []).map((area) => ({
+    ...area,
+    projectCount: projectCounts.get(area.id) ?? 0,
+    taskCount: taskCounts.get(area.id) ?? 0,
+  }));
 }
 
 export default async function AppLayout({
@@ -63,6 +89,13 @@ export default async function AppLayout({
             </span>
           </div>
           <div className="flex items-center gap-3">
+            <Link
+              href="/trash"
+              aria-label={tCommon("trash")}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Link>
             <a
               href="/api/export"
               aria-label={tCommon("export")}

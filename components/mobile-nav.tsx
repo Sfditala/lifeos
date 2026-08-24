@@ -15,6 +15,8 @@ type LifeArea = {
   id: string;
   name: string;
   color: string | null;
+  projectCount: number;
+  taskCount: number;
 };
 
 export function MobileNav({

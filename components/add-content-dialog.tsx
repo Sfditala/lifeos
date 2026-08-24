@@ -3,7 +3,7 @@
 import { useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { Plus } from "lucide-react";
-import { createContentItem } from "@/lib/actions";
+import { createContentItem, updateContentItem } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,11 +17,25 @@ import {
 } from "@/components/ui/dialog";
 
 type Project = { id: string; name: string; life_area_id: string };
+type Initial = { id: string; title: string; project_id: string | null };
 
-export function AddContentDialog({ projects }: { projects: Project[] }) {
+export function AddContentDialog({
+  projects,
+  initial,
+  open: controlledOpen,
+  onOpenChange: setControlledOpen,
+}: {
+  projects: Project[];
+  initial?: Initial;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}) {
   const t = useTranslations("content");
   const tCommon = useTranslations("common");
-  const [open, setOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = isControlled ? setControlledOpen! : setInternalOpen;
   const [pending, setPending] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -33,7 +47,11 @@ export function AddContentDialog({ projects }: { projects: Project[] }) {
     const projectId = formData.get("project_id") as string;
     const project = projects.find((p) => p.id === projectId);
     if (project) formData.set("life_area_id", project.life_area_id);
-    await createContentItem(formData);
+    if (initial) {
+      await updateContentItem(initial.id, formData);
+    } else {
+      await createContentItem(formData);
+    }
     setPending(false);
     setOpen(false);
     formRef.current.reset();
@@ -41,18 +59,28 @@ export function AddContentDialog({ projects }: { projects: Project[] }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button size="sm" />}>
-        <Plus className="h-4 w-4" />
-        {t("addItem")}
-      </DialogTrigger>
+      {!initial && (
+        <DialogTrigger render={<Button size="sm" />}>
+          <Plus className="h-4 w-4" />
+          {t("addItem")}
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("newItemTitle")}</DialogTitle>
+          <DialogTitle>
+            {initial ? tCommon("edit") : t("newItemTitle")}
+          </DialogTitle>
         </DialogHeader>
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
             <Label htmlFor="content-title">{tCommon("title")}</Label>
-            <Input id="content-title" name="title" required autoFocus />
+            <Input
+              id="content-title"
+              name="title"
+              required
+              autoFocus
+              defaultValue={initial?.title}
+            />
           </div>
           {projects.length > 0 && (
             <div className="space-y-1">
@@ -60,7 +88,7 @@ export function AddContentDialog({ projects }: { projects: Project[] }) {
               <select
                 id="project_id"
                 name="project_id"
-                defaultValue=""
+                defaultValue={initial?.project_id ?? ""}
                 className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
               >
                 <option value="">{tCommon("none")}</option>

@@ -40,7 +40,25 @@
     "color": "Color",
     "none": "None",
     "export": "Export my data",
-    "description": "Description"
+    "description": "Description",
+    "edit": "Edit",
+    "delete": "Delete",
+    "more": "More",
+    "confirmDeleteTitle": "Delete this?",
+    "deleteAreaImpact": "{projects} project(s) and {tasks} task(s) in this area will move to trash with it. You can restore within 30 days.",
+    "deleteProjectImpact": "{tasks} task(s) and {milestones} milestone(s) in this project will move to trash with it. You can restore within 30 days.",
+    "deleteSimpleImpact": "It will move to trash — you can restore it within 30 days.",
+    "trash": "Trash"
+  },
+  "trash": {
+    "title": "Trash",
+    "empty": "Trash is empty",
+    "deletedDaysAgo": "Deleted {days} day(s) ago",
+    "autoPurgeIn": "Permanently deleted after {days} more day(s)",
+    "restore": "Restore",
+    "deleteForever": "Delete forever",
+    "confirmForeverTitle": "Delete forever — cannot be undone",
+    "confirmForeverMessage": "This action is permanent and can never be reversed."
   },
   "status": {
     "active": "Active",

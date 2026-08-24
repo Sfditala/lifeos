@@ -15,30 +15,49 @@ export default async function AreaPage({
   const supabase = await createClient();
   const today = todayIso();
 
-  const [{ data: area }, { data: goals }, { data: projects }, { data: tasks }, { data: notes }] =
-    await Promise.all([
-      supabase.from("life_areas").select("id, name, color").eq("id", areaId).single(),
-      supabase
-        .from("goals")
-        .select("id, title, status, target_date")
-        .eq("life_area_id", areaId)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("projects")
-        .select("id, name, status")
-        .eq("life_area_id", areaId)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("tasks")
-        .select("id, title, status, priority, due_date")
-        .eq("life_area_id", areaId)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("knowledge_notes")
-        .select("id, title, body")
-        .eq("life_area_id", areaId)
-        .order("updated_at", { ascending: false }),
-    ]);
+  const [
+    { data: area },
+    { data: goals },
+    { data: projects },
+    { data: tasks },
+    { data: notes },
+    { data: milestones },
+  ] = await Promise.all([
+    supabase
+      .from("life_areas")
+      .select("id, name, color")
+      .eq("id", areaId)
+      .is("deleted_at", null)
+      .single(),
+    supabase
+      .from("goals")
+      .select("id, title, status, target_date")
+      .eq("life_area_id", areaId)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("projects")
+      .select("id, name, description, status, due_date, goal_id")
+      .eq("life_area_id", areaId)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("tasks")
+      .select("id, title, status, priority, due_date, project_id")
+      .eq("life_area_id", areaId)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("knowledge_notes")
+      .select("id, title, body")
+      .eq("life_area_id", areaId)
+      .is("deleted_at", null)
+      .order("updated_at", { ascending: false }),
+    supabase
+      .from("project_milestones")
+      .select("id, project_id")
+      .is("deleted_at", null),
+  ]);
 
   if (!area) notFound();
 
@@ -49,6 +68,22 @@ export default async function AreaPage({
     (t) => t.due_date && t.due_date < today && t.status !== "done",
   ).length;
   const latestNoteTitle = notes && notes.length > 0 ? notes[0].title : null;
+
+  const taskCountByProject = new Map<string, number>();
+  for (const task of tasks ?? []) {
+    if (!task.project_id) continue;
+    taskCountByProject.set(
+      task.project_id,
+      (taskCountByProject.get(task.project_id) ?? 0) + 1,
+    );
+  }
+  const milestoneCountByProject = new Map<string, number>();
+  for (const m of milestones ?? []) {
+    milestoneCountByProject.set(
+      m.project_id,
+      (milestoneCountByProject.get(m.project_id) ?? 0) + 1,
+    );
+  }
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 sm:p-6">
@@ -63,7 +98,11 @@ export default async function AreaPage({
       <AreaTabs
         areaId={areaId}
         goals={goals ?? []}
-        projects={projects ?? []}
+        projects={(projects ?? []).map((p) => ({
+          ...p,
+          taskCount: taskCountByProject.get(p.id) ?? 0,
+          milestoneCount: milestoneCountByProject.get(p.id) ?? 0,
+        }))}
         tasks={tasks ?? []}
         notes={notes ?? []}
         overview={{ activeProjects, overdueTasks, latestNoteTitle }}

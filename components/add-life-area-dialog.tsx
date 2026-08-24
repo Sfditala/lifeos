@@ -3,7 +3,7 @@
 import { useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { Plus } from "lucide-react";
-import { createLifeArea } from "@/lib/actions";
+import { createLifeArea, updateLifeArea } from "@/lib/actions";
 import { LIFE_AREA_PALETTE } from "@/lib/palette";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,11 +17,24 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-export function AddLifeAreaDialog() {
+type Initial = { id: string; name: string; color: string | null };
+
+export function AddLifeAreaDialog({
+  initial,
+  open: controlledOpen,
+  onOpenChange: setControlledOpen,
+}: {
+  initial?: Initial;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+} = {}) {
   const t = useTranslations("areas");
   const tCommon = useTranslations("common");
-  const [open, setOpen] = useState(false);
-  const [color, setColor] = useState(LIFE_AREA_PALETTE[0]);
+  const isControlled = controlledOpen !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = isControlled ? setControlledOpen! : setInternalOpen;
+  const [color, setColor] = useState(initial?.color ?? LIFE_AREA_PALETTE[0]);
   const [pending, setPending] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -30,7 +43,11 @@ export function AddLifeAreaDialog() {
     if (!formRef.current) return;
     setPending(true);
     const formData = new FormData(formRef.current);
-    await createLifeArea(formData);
+    if (initial) {
+      await updateLifeArea(initial.id, formData);
+    } else {
+      await createLifeArea(formData);
+    }
     setPending(false);
     setOpen(false);
     formRef.current.reset();
@@ -39,21 +56,31 @@ export function AddLifeAreaDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        render={
-          <Button variant="ghost" size="icon-sm" aria-label={t("addArea")} />
-        }
-      >
-        <Plus className="h-4 w-4" />
-      </DialogTrigger>
+      {!initial && (
+        <DialogTrigger
+          render={
+            <Button variant="ghost" size="icon-sm" aria-label={t("addArea")} />
+          }
+        >
+          <Plus className="h-4 w-4" />
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("newAreaTitle")}</DialogTitle>
+          <DialogTitle>
+            {initial ? tCommon("edit") : t("newAreaTitle")}
+          </DialogTitle>
         </DialogHeader>
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
             <Label htmlFor="name">{tCommon("name")}</Label>
-            <Input id="name" name="name" required autoFocus />
+            <Input
+              id="name"
+              name="name"
+              required
+              autoFocus
+              defaultValue={initial?.name}
+            />
           </div>
           <div className="space-y-1">
             <Label>{tCommon("color")}</Label>

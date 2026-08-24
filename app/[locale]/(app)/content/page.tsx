@@ -1,9 +1,7 @@
-import { Newspaper } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { AddContentDialog } from "@/components/add-content-dialog";
-import { ContentStatusSelect } from "@/components/content-status-select";
-import { EmptyState } from "@/components/empty-state";
+import { ContentList } from "@/components/content-list";
 
 export default async function ContentPage() {
   const supabase = await createClient();
@@ -11,11 +9,13 @@ export default async function ContentPage() {
   const [{ data: items }, { data: projects }] = await Promise.all([
     supabase
       .from("content_items")
-      .select("id, title, status, scheduled_date, life_areas(color)")
+      .select("id, title, status, scheduled_date, project_id, life_areas(color)")
+      .is("deleted_at", null)
       .order("created_at", { ascending: false }),
     supabase
       .from("projects")
       .select("id, name, life_area_id")
+      .is("deleted_at", null)
       .order("created_at", { ascending: false }),
   ]);
 
@@ -30,39 +30,17 @@ export default async function ContentPage() {
         <AddContentDialog projects={projects ?? []} />
       </div>
 
-      {items && items.length > 0 ? (
-        <ul className="divide-y divide-border rounded-lg border border-border">
-          {items.map((item) => (
-            <li
-              key={item.id}
-              className="flex items-center gap-3 px-4 py-3"
-            >
-              <span
-                className="h-2 w-2 shrink-0 rounded-full"
-                style={{
-                  backgroundColor:
-                    item.life_areas?.[0]?.color ?? "var(--muted-foreground)",
-                }}
-              />
-              <span className="flex-1 text-sm text-foreground">
-                {item.title}
-              </span>
-              {item.scheduled_date && (
-                <span className="text-xs text-muted-foreground">
-                  {item.scheduled_date}
-                </span>
-              )}
-              <ContentStatusSelect itemId={item.id} status={item.status} />
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <EmptyState
-          icon={Newspaper}
-          message={t("empty")}
-          action={<AddContentDialog projects={projects ?? []} />}
-        />
-      )}
+      <ContentList
+        items={(items ?? []).map((item) => ({
+          id: item.id,
+          title: item.title,
+          status: item.status,
+          scheduled_date: item.scheduled_date,
+          project_id: item.project_id,
+          color: item.life_areas?.[0]?.color ?? null,
+        }))}
+        projects={projects ?? []}
+      />
     </div>
   );
 }

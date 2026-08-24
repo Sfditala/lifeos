@@ -1,9 +1,8 @@
-import { StickyNote, SearchX } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { AddNoteDialog } from "@/components/add-note-dialog";
 import { NotesSearch } from "@/components/notes-search";
-import { EmptyState } from "@/components/empty-state";
+import { NotesList } from "@/components/notes-list";
 
 export default async function NotesPage({
   searchParams,
@@ -16,6 +15,7 @@ export default async function NotesPage({
   let query = supabase
     .from("knowledge_notes")
     .select("id, title, body")
+    .is("deleted_at", null)
     .order("updated_at", { ascending: false });
 
   if (q) {
@@ -37,31 +37,7 @@ export default async function NotesPage({
         </div>
       </div>
 
-      {notes && notes.length > 0 ? (
-        <ul className="grid gap-3 sm:grid-cols-2">
-          {notes.map((note) => (
-            <li
-              key={note.id}
-              className="rounded-lg border border-border bg-card p-4"
-            >
-              <h3 className="mb-1 text-sm font-semibold text-foreground">
-                {note.title}
-              </h3>
-              <p className="line-clamp-3 text-sm text-muted-foreground">
-                {note.body}
-              </p>
-            </li>
-          ))}
-        </ul>
-      ) : q ? (
-        <EmptyState icon={SearchX} message={t("noResults")} />
-      ) : (
-        <EmptyState
-          icon={StickyNote}
-          message={t("empty")}
-          action={<AddNoteDialog />}
-        />
-      )}
+      <NotesList notes={notes ?? []} q={q ?? ""} />
     </div>
   );
 }

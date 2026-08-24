@@ -32,6 +32,7 @@ export default async function HabitsPage() {
     .from("habits")
     .select("id, name, frequency")
     .eq("active", true)
+    .is("deleted_at", null)
     .order("created_at", { ascending: true });
 
   const habitIds = (habits ?? []).map((h) => h.id);
@@ -72,6 +73,7 @@ export default async function HabitsPage() {
                 key={habit.id}
                 habitId={habit.id}
                 name={habit.name}
+                frequency={habit.frequency}
                 doneToday={dates.has(today)}
                 streak={computeStreak(dates)}
               />
