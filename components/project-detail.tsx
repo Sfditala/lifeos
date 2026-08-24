@@ -11,6 +11,7 @@ import { AddMilestoneDialog } from "@/components/add-milestone-dialog";
 import { AddProjectDialog } from "@/components/add-project-dialog";
 import { EmptyState } from "@/components/empty-state";
 import { RowMenu } from "@/components/row-menu";
+import { FilesList } from "@/components/files-list";
 import {
   deleteProject,
   deleteMilestone,
@@ -24,6 +25,14 @@ type Project = {
   status: string;
   due_date: string | null;
   goal_id: string | null;
+};
+type Document = {
+  id: string;
+  file_name: string;
+  file_type: string | null;
+  size_bytes: number | null;
+  storage_path: string;
+  uploaded_at: string;
 };
 type Milestone = {
   id: string;
@@ -46,15 +55,18 @@ export function ProjectDetail({
   milestones,
   tasks,
   goals,
+  documents,
 }: {
   areaId: string;
   project: Project;
   milestones: Milestone[];
   tasks: Task[];
   goals: Goal[];
+  documents: Document[];
 }) {
   const t = useTranslations("project");
   const tAreas = useTranslations("areas");
+  const tFiles = useTranslations("files");
   const tCommon = useTranslations("common");
   const router = useRouter();
 
@@ -206,6 +218,13 @@ export function ProjectDetail({
             }
           />
         )}
+      </section>
+
+      <section>
+        <h2 className="mb-3 text-sm font-semibold text-foreground">
+          {tFiles("title")}
+        </h2>
+        <FilesList documents={documents} projectId={project.id} />
       </section>
     </div>
   );

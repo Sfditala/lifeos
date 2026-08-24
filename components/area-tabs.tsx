@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Users, FileBox, Target, FolderKanban, ListTodo, StickyNote } from "lucide-react";
+import { Users, Target, FolderKanban, ListTodo, StickyNote } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import {
   Tabs,
@@ -17,8 +17,17 @@ import { AddTaskDialog } from "@/components/add-task-dialog";
 import { AddNoteDialog } from "@/components/add-note-dialog";
 import { EmptyState } from "@/components/empty-state";
 import { RowMenu } from "@/components/row-menu";
+import { FilesList } from "@/components/files-list";
 import { deleteGoal, deleteProject, deleteTask, deleteNote } from "@/lib/actions";
 
+type Document = {
+  id: string;
+  file_name: string;
+  file_type: string | null;
+  size_bytes: number | null;
+  storage_path: string;
+  uploaded_at: string;
+};
 type Goal = { id: string; title: string; status: string; target_date: string | null };
 type Project = {
   id: string;
@@ -48,6 +57,7 @@ export function AreaTabs({
   projects,
   tasks,
   notes,
+  documents,
   overview,
 }: {
   areaId: string;
@@ -57,6 +67,7 @@ export function AreaTabs({
   projects: Project[];
   tasks: Task[];
   notes: Note[];
+  documents: Document[];
   overview: {
     activeProjects: number;
     overdueTasks: number;
@@ -309,7 +320,7 @@ export function AreaTabs({
 
       {showFiles && (
         <TabsContent value="files">
-          <EmptyState icon={FileBox} message={t("comingSoon")} />
+          <FilesList documents={documents} lifeAreaId={areaId} />
         </TabsContent>
       )}
     </Tabs>

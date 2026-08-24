@@ -14,6 +14,7 @@ export default async function TrashPage() {
     { data: content },
     { data: notes },
     { data: milestones },
+    { data: documents },
   ] = await Promise.all([
     supabase
       .from("life_areas")
@@ -47,6 +48,10 @@ export default async function TrashPage() {
       .from("project_milestones")
       .select("id, title, deleted_at")
       .not("deleted_at", "is", null),
+    supabase
+      .from("documents")
+      .select("id, file_name, deleted_at")
+      .not("deleted_at", "is", null),
   ]);
 
   const t = await getTranslations("trash");
@@ -55,6 +60,7 @@ export default async function TrashPage() {
   const tContent = await getTranslations("content");
   const tNotes = await getTranslations("notes");
   const tProject = await getTranslations("project");
+  const tFiles = await getTranslations("files");
   const tCommon = await getTranslations("common");
 
   const rows: TrashRow[] = [
@@ -112,6 +118,13 @@ export default async function TrashPage() {
       id: r.id,
       label: r.title,
       typeLabel: tProject("milestones"),
+      deletedAt: r.deleted_at as string,
+    })),
+    ...(documents ?? []).map((r) => ({
+      table: "documents" as const,
+      id: r.id,
+      label: r.file_name,
+      typeLabel: tFiles("title"),
       deletedAt: r.deleted_at as string,
     })),
   ].sort((a, b) => b.deletedAt.localeCompare(a.deletedAt));

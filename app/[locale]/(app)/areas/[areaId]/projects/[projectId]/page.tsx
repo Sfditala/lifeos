@@ -10,8 +10,13 @@ export default async function ProjectPage({
   const { areaId, projectId } = await params;
   const supabase = await createClient();
 
-  const [{ data: project }, { data: milestones }, { data: tasks }, { data: goals }] =
-    await Promise.all([
+  const [
+    { data: project },
+    { data: milestones },
+    { data: tasks },
+    { data: goals },
+    { data: documents },
+  ] = await Promise.all([
       supabase
         .from("projects")
         .select("id, name, description, status, due_date, goal_id")
@@ -36,6 +41,12 @@ export default async function ProjectPage({
         .select("id, title")
         .eq("life_area_id", areaId)
         .is("deleted_at", null),
+      supabase
+        .from("documents")
+        .select("id, file_name, file_type, size_bytes, storage_path, uploaded_at")
+        .eq("project_id", projectId)
+        .is("deleted_at", null)
+        .order("uploaded_at", { ascending: false }),
     ]);
 
   if (!project) notFound();
@@ -47,6 +58,7 @@ export default async function ProjectPage({
       milestones={milestones ?? []}
       tasks={tasks ?? []}
       goals={goals ?? []}
+      documents={documents ?? []}
     />
   );
 }

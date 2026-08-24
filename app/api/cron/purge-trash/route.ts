@@ -42,5 +42,29 @@ export async function GET(request: Request) {
     results[table] = count ?? 0;
   }
 
+  const { data: expiredDocs, error: docsFetchError } = await supabase
+    .from("documents")
+    .select("id, storage_path")
+    .lt("deleted_at", cutoff);
+  if (docsFetchError) {
+    return NextResponse.json(
+      { error: docsFetchError.message, table: "documents" },
+      { status: 500 },
+    );
+  }
+  if (expiredDocs && expiredDocs.length > 0) {
+    await supabase.storage
+      .from("documents")
+      .remove(expiredDocs.map((d) => d.storage_path));
+    await supabase
+      .from("documents")
+      .delete()
+      .in(
+        "id",
+        expiredDocs.map((d) => d.id),
+      );
+  }
+  results.documents = expiredDocs?.length ?? 0;
+
   return NextResponse.json({ status: "ok", purged: results });
 }

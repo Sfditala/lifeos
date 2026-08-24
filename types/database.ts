@@ -135,6 +135,60 @@ export type Database = {
           },
         ]
       }
+      documents: {
+        Row: {
+          deleted_at: string | null
+          file_name: string
+          file_type: string | null
+          id: string
+          life_area_id: string | null
+          project_id: string | null
+          size_bytes: number | null
+          storage_path: string
+          uploaded_at: string | null
+          user_id: string
+        }
+        Insert: {
+          deleted_at?: string | null
+          file_name: string
+          file_type?: string | null
+          id?: string
+          life_area_id?: string | null
+          project_id?: string | null
+          size_bytes?: number | null
+          storage_path: string
+          uploaded_at?: string | null
+          user_id: string
+        }
+        Update: {
+          deleted_at?: string | null
+          file_name?: string
+          file_type?: string | null
+          id?: string
+          life_area_id?: string | null
+          project_id?: string | null
+          size_bytes?: number | null
+          storage_path?: string
+          uploaded_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_life_area_id_fkey"
+            columns: ["life_area_id"]
+            isOneToOne: false
+            referencedRelation: "life_areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goals: {
         Row: {
           created_at: string | null
@@ -334,6 +388,63 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      meetings: {
+        Row: {
+          created_at: string | null
+          deleted_at: string | null
+          ends_at: string | null
+          id: string
+          life_area_id: string | null
+          location: string | null
+          notes: string | null
+          project_id: string | null
+          starts_at: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          deleted_at?: string | null
+          ends_at?: string | null
+          id?: string
+          life_area_id?: string | null
+          location?: string | null
+          notes?: string | null
+          project_id?: string | null
+          starts_at: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          deleted_at?: string | null
+          ends_at?: string | null
+          id?: string
+          life_area_id?: string | null
+          location?: string | null
+          notes?: string | null
+          project_id?: string | null
+          starts_at?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meetings_life_area_id_fkey"
+            columns: ["life_area_id"]
+            isOneToOne: false
+            referencedRelation: "life_areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meetings_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       project_milestones: {
         Row: {

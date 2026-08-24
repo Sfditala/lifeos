@@ -16,7 +16,8 @@ export type TrashRow = {
     | "habits"
     | "content_items"
     | "knowledge_notes"
-    | "project_milestones";
+    | "project_milestones"
+    | "documents";
   id: string;
   label: string;
   typeLabel: string;

@@ -571,6 +571,62 @@ export async function deleteMilestone(milestoneId: string) {
   revalidatePath("/", "layout");
 }
 
+// --- Documents ---
+
+const MAX_DOCUMENT_BYTES = 20 * 1024 * 1024;
+
+export async function uploadDocument(formData: FormData) {
+  const { supabase, userId } = await requireUserId();
+  const file = formData.get("file");
+  const lifeAreaId = str(formData, "life_area_id");
+  const projectId = str(formData, "project_id");
+
+  if (!(file instanceof File) || file.size === 0) {
+    throw new Error("No file provided");
+  }
+  if (file.size > MAX_DOCUMENT_BYTES) {
+    throw new Error("File too large");
+  }
+
+  const storagePath = `${userId}/${crypto.randomUUID()}-${file.name}`;
+  const { error: uploadError } = await supabase.storage
+    .from("documents")
+    .upload(storagePath, file, { contentType: file.type || undefined });
+  if (uploadError) throw uploadError;
+
+  const { error } = await supabase.from("documents").insert({
+    user_id: userId,
+    life_area_id: lifeAreaId,
+    project_id: projectId,
+    file_name: file.name,
+    storage_path: storagePath,
+    file_type: file.type || null,
+    size_bytes: file.size,
+  });
+  if (error) throw error;
+
+  revalidatePath("/", "layout");
+}
+
+export async function deleteDocument(documentId: string) {
+  const { supabase } = await requireUserId();
+  const { error } = await supabase
+    .from("documents")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", documentId);
+  if (error) throw error;
+  revalidatePath("/", "layout");
+}
+
+export async function getDocumentDownloadUrl(storagePath: string) {
+  const { supabase } = await requireUserId();
+  const { data, error } = await supabase.storage
+    .from("documents")
+    .createSignedUrl(storagePath, 60);
+  if (error) throw error;
+  return data.signedUrl;
+}
+
 // --- Onboarding ---
 
 export async function completeOnboarding(formData: FormData) {
@@ -615,6 +671,7 @@ const TRASH_TABLES = [
   "content_items",
   "knowledge_notes",
   "project_milestones",
+  "documents",
 ] as const;
 
 type TrashTable = (typeof TRASH_TABLES)[number];
@@ -633,6 +690,18 @@ export async function restoreFromTrash(table: TrashTable, id: string) {
 export async function purgeFromTrash(table: TrashTable, id: string) {
   const { supabase } = await requireUserId();
   if (!TRASH_TABLES.includes(table)) throw new Error("Invalid table");
+
+  if (table === "documents") {
+    const { data: doc } = await supabase
+      .from("documents")
+      .select("storage_path")
+      .eq("id", id)
+      .single();
+    if (doc) {
+      await supabase.storage.from("documents").remove([doc.storage_path]);
+    }
+  }
+
   const { error } = await supabase.from(table).delete().eq("id", id);
   if (error) throw error;
   revalidatePath("/", "layout");
