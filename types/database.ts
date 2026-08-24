@@ -189,6 +189,39 @@ export type Database = {
           },
         ]
       }
+      entity_links: {
+        Row: {
+          created_at: string | null
+          from_id: string
+          from_type: string
+          id: string
+          relation_label: string | null
+          to_id: string
+          to_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          from_id: string
+          from_type: string
+          id?: string
+          relation_label?: string | null
+          to_id: string
+          to_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          from_id?: string
+          from_type?: string
+          id?: string
+          relation_label?: string | null
+          to_id?: string
+          to_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       goals: {
         Row: {
           created_at: string | null

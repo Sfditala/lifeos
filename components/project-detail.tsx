@@ -12,10 +12,12 @@ import { AddProjectDialog } from "@/components/add-project-dialog";
 import { EmptyState } from "@/components/empty-state";
 import { RowMenu } from "@/components/row-menu";
 import { FilesList } from "@/components/files-list";
+import { LinkedItems } from "@/components/linked-items";
 import {
   deleteProject,
   deleteMilestone,
   deleteTask,
+  type ResolvedLink,
 } from "@/lib/actions";
 
 type Project = {
@@ -56,6 +58,7 @@ export function ProjectDetail({
   tasks,
   goals,
   documents,
+  links,
 }: {
   areaId: string;
   project: Project;
@@ -63,6 +66,7 @@ export function ProjectDetail({
   tasks: Task[];
   goals: Goal[];
   documents: Document[];
+  links: ResolvedLink[];
 }) {
   const t = useTranslations("project");
   const tAreas = useTranslations("areas");
@@ -225,6 +229,10 @@ export function ProjectDetail({
           {tFiles("title")}
         </h2>
         <FilesList documents={documents} projectId={project.id} />
+      </section>
+
+      <section>
+        <LinkedItems entityType="project" entityId={project.id} links={links} />
       </section>
     </div>
   );

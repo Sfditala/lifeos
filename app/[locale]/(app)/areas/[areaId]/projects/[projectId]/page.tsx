@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getEntityLinks } from "@/lib/actions";
 import { ProjectDetail } from "@/components/project-detail";
 
 export default async function ProjectPage({
@@ -51,6 +52,8 @@ export default async function ProjectPage({
 
   if (!project) notFound();
 
+  const links = await getEntityLinks("project", projectId);
+
   return (
     <ProjectDetail
       areaId={areaId}
@@ -59,6 +62,7 @@ export default async function ProjectPage({
       tasks={tasks ?? []}
       goals={goals ?? []}
       documents={documents ?? []}
+      links={links}
     />
   );
 }

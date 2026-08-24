@@ -689,6 +689,132 @@ export async function deleteMeeting(meetingId: string) {
   revalidatePath("/", "layout");
 }
 
+// --- Entity links ---
+
+const ENTITY_CONFIG: Record<string, { table: string; titleColumn: string }> = {
+  life_area: { table: "life_areas", titleColumn: "name" },
+  goal: { table: "goals", titleColumn: "title" },
+  project: { table: "projects", titleColumn: "name" },
+  task: { table: "tasks", titleColumn: "title" },
+  habit: { table: "habits", titleColumn: "name" },
+  content_item: { table: "content_items", titleColumn: "title" },
+  knowledge_note: { table: "knowledge_notes", titleColumn: "title" },
+  project_milestone: { table: "project_milestones", titleColumn: "title" },
+  document: { table: "documents", titleColumn: "file_name" },
+  meeting: { table: "meetings", titleColumn: "title" },
+};
+
+export type EntitySearchResult = { type: string; id: string; label: string };
+
+export async function searchEntities(
+  query: string,
+  excludeType: string,
+  excludeId: string,
+): Promise<EntitySearchResult[]> {
+  const { supabase } = await requireUserId();
+  if (query.trim().length < 2) return [];
+
+  const results: EntitySearchResult[] = [];
+  for (const [type, config] of Object.entries(ENTITY_CONFIG)) {
+    const { data } = await supabase
+      .from(config.table)
+      .select("*")
+      .ilike(config.titleColumn, `%${query}%`)
+      .is("deleted_at", null)
+      .limit(5);
+    for (const row of data ?? []) {
+      const r = row as unknown as Record<string, string>;
+      if (type === excludeType && r.id === excludeId) continue;
+      results.push({ type, id: r.id, label: r[config.titleColumn] });
+    }
+  }
+  return results;
+}
+
+export async function createEntityLink(
+  fromType: string,
+  fromId: string,
+  toType: string,
+  toId: string,
+  relationLabel: string | null,
+) {
+  const { supabase, userId } = await requireUserId();
+  const { error } = await supabase.from("entity_links").insert({
+    user_id: userId,
+    from_type: fromType,
+    from_id: fromId,
+    to_type: toType,
+    to_id: toId,
+    relation_label: relationLabel,
+  });
+  if (error) throw error;
+  revalidatePath("/", "layout");
+}
+
+export async function deleteEntityLink(linkId: string) {
+  const { supabase } = await requireUserId();
+  const { error } = await supabase
+    .from("entity_links")
+    .delete()
+    .eq("id", linkId);
+  if (error) throw error;
+  revalidatePath("/", "layout");
+}
+
+export type ResolvedLink = {
+  linkId: string;
+  otherType: string;
+  otherId: string;
+  otherLabel: string;
+  relationLabel: string | null;
+};
+
+export async function getEntityLinks(
+  type: string,
+  id: string,
+): Promise<ResolvedLink[]> {
+  const { supabase } = await requireUserId();
+  const { data: links } = await supabase
+    .from("entity_links")
+    .select("id, from_type, from_id, to_type, to_id, relation_label")
+    .or(
+      `and(from_type.eq.${type},from_id.eq.${id}),and(to_type.eq.${type},to_id.eq.${id})`,
+    );
+  if (!links || links.length === 0) return [];
+
+  const byType = new Map<string, Set<string>>();
+  const others = links.map((link) => {
+    const isFrom = link.from_type === type && link.from_id === id;
+    const otherType = isFrom ? link.to_type : link.from_type;
+    const otherId = isFrom ? link.to_id : link.from_id;
+    if (!byType.has(otherType)) byType.set(otherType, new Set());
+    byType.get(otherType)!.add(otherId);
+    return { link, otherType, otherId };
+  });
+
+  const labelsByKey = new Map<string, string>();
+  for (const [otherType, ids] of byType) {
+    const config = ENTITY_CONFIG[otherType];
+    if (!config) continue;
+    const { data } = await supabase
+      .from(config.table)
+      .select("*")
+      .in("id", Array.from(ids));
+    for (const row of data ?? []) {
+      const r = row as unknown as Record<string, string>;
+      labelsByKey.set(`${otherType}:${r.id}`, r[config.titleColumn]);
+    }
+  }
+
+  return others.map(({ link, otherType, otherId }) => ({
+    linkId: link.id,
+    otherType,
+    otherId,
+    otherLabel: labelsByKey.get(`${otherType}:${otherId}`) ?? "—",
+    relationLabel: link.relation_label,
+  }));
+}
+
 // --- Onboarding ---
 
 export async function completeOnboarding(formData: FormData) {

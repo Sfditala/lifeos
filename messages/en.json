@@ -37,6 +37,8 @@
     "lifeArea": "Life area",
     "project": "Project",
     "goal": "Goal",
+    "task": "Task",
+    "habit": "Habit",
     "color": "Color",
     "none": "None",
     "export": "Export my data",
@@ -173,6 +175,15 @@
     "goal": "Goal",
     "content": "Content",
     "meeting": "Meeting"
+  },
+  "links": {
+    "title": "Linked items",
+    "addLink": "Link to another item",
+    "searchPlaceholder": "Search a task, note, file...",
+    "relationPlaceholder": "Relation (e.g. reference for, conflicts with)",
+    "empty": "No linked items yet",
+    "noResults": "No results",
+    "link": "Link"
   },
   "meetings": {
     "title": "Meetings",
