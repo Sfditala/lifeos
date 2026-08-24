@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CalendarMonth } from "@/components/calendar-month";
 
 export type CalendarItem = {
-  type: "task" | "goal" | "content";
+  type: "task" | "goal" | "content" | "meeting";
   label: string;
   color: string;
 };
@@ -32,25 +32,36 @@ export default async function CalendarPage({
   const start = `${year}-${pad(month)}-01`;
   const lastDay = new Date(year, month, 0).getDate();
   const end = `${year}-${pad(month)}-${pad(lastDay)}`;
+  const startTs = `${start}T00:00:00`;
+  const endTs = `${end}T23:59:59`;
 
   const supabase = await createClient();
-  const [{ data: tasks }, { data: goals }, { data: content }] =
+  const [{ data: tasks }, { data: goals }, { data: content }, { data: meetings }] =
     await Promise.all([
       supabase
         .from("tasks")
         .select("title, due_date, life_areas(color)")
+        .is("deleted_at", null)
         .gte("due_date", start)
         .lte("due_date", end),
       supabase
         .from("goals")
         .select("title, target_date, life_areas(color)")
+        .is("deleted_at", null)
         .gte("target_date", start)
         .lte("target_date", end),
       supabase
         .from("content_items")
         .select("title, scheduled_date, life_areas(color)")
+        .is("deleted_at", null)
         .gte("scheduled_date", start)
         .lte("scheduled_date", end),
+      supabase
+        .from("meetings")
+        .select("title, starts_at, life_areas(color)")
+        .is("deleted_at", null)
+        .gte("starts_at", startTs)
+        .lte("starts_at", endTs),
     ]);
 
   const t = await getTranslations("calendar");
@@ -84,6 +95,14 @@ export default async function CalendarPage({
       item.life_areas?.[0]?.color,
     );
   }
+  for (const meeting of meetings ?? []) {
+    addItem(
+      meeting.starts_at.slice(0, 10),
+      "meeting",
+      meeting.title,
+      meeting.life_areas?.[0]?.color,
+    );
+  }
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 sm:p-6">
@@ -96,6 +115,7 @@ export default async function CalendarPage({
           task: t("task"),
           goal: t("goal"),
           content: t("content"),
+          meeting: t("meeting"),
           empty: t("empty"),
         }}
       />

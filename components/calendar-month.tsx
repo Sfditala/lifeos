@@ -26,7 +26,13 @@ export function CalendarMonth({
   year: number;
   month: number;
   itemsByDate: Record<string, CalendarItem[]>;
-  labels: { task: string; goal: string; content: string; empty: string };
+  labels: {
+    task: string;
+    goal: string;
+    content: string;
+    meeting: string;
+    empty: string;
+  };
 }) {
   const locale = useLocale();
   const router = useRouter();

@@ -23,6 +23,7 @@ export default async function AreaPage({
     { data: notes },
     { data: milestones },
     { data: documents },
+    { data: meetings },
   ] = await Promise.all([
     supabase
       .from("life_areas")
@@ -64,6 +65,12 @@ export default async function AreaPage({
       .eq("life_area_id", areaId)
       .is("deleted_at", null)
       .order("uploaded_at", { ascending: false }),
+    supabase
+      .from("meetings")
+      .select("id, title, starts_at, ends_at, location, notes")
+      .eq("life_area_id", areaId)
+      .is("deleted_at", null)
+      .order("starts_at", { ascending: true }),
   ]);
 
   if (!area) notFound();
@@ -115,6 +122,7 @@ export default async function AreaPage({
         tasks={tasks ?? []}
         notes={notes ?? []}
         documents={documents ?? []}
+        meetings={meetings ?? []}
         overview={{ activeProjects, overdueTasks, latestNoteTitle }}
       />
     </div>

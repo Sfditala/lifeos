@@ -627,6 +627,68 @@ export async function getDocumentDownloadUrl(storagePath: string) {
   return data.signedUrl;
 }
 
+// --- Meetings ---
+
+export async function createMeeting(formData: FormData) {
+  const { supabase, userId } = await requireUserId();
+  const title = str(formData, "title");
+  const startsAt = str(formData, "starts_at");
+  const endsAt = str(formData, "ends_at");
+  const location = str(formData, "location");
+  const notes = str(formData, "notes");
+  const lifeAreaId = str(formData, "life_area_id");
+  const projectId = str(formData, "project_id");
+  if (!title || !startsAt) throw new Error("Missing fields");
+
+  const { error } = await supabase.from("meetings").insert({
+    user_id: userId,
+    life_area_id: lifeAreaId,
+    project_id: projectId,
+    title,
+    starts_at: startsAt,
+    ends_at: endsAt,
+    location,
+    notes,
+  });
+  if (error) throw error;
+
+  revalidatePath("/", "layout");
+}
+
+export async function updateMeeting(meetingId: string, formData: FormData) {
+  const { supabase } = await requireUserId();
+  const title = str(formData, "title");
+  const startsAt = str(formData, "starts_at");
+  const endsAt = str(formData, "ends_at");
+  const location = str(formData, "location");
+  const notes = str(formData, "notes");
+  if (!title || !startsAt) throw new Error("Missing fields");
+
+  const { error } = await supabase
+    .from("meetings")
+    .update({
+      title,
+      starts_at: startsAt,
+      ends_at: endsAt,
+      location,
+      notes,
+    })
+    .eq("id", meetingId);
+  if (error) throw error;
+
+  revalidatePath("/", "layout");
+}
+
+export async function deleteMeeting(meetingId: string) {
+  const { supabase } = await requireUserId();
+  const { error } = await supabase
+    .from("meetings")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", meetingId);
+  if (error) throw error;
+  revalidatePath("/", "layout");
+}
+
 // --- Onboarding ---
 
 export async function completeOnboarding(formData: FormData) {
@@ -672,6 +734,7 @@ const TRASH_TABLES = [
   "knowledge_notes",
   "project_milestones",
   "documents",
+  "meetings",
 ] as const;
 
 type TrashTable = (typeof TRASH_TABLES)[number];

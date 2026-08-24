@@ -11,11 +11,15 @@ export default async function HomePage() {
   const supabase = await createClient();
   const today = todayIso();
 
+  const in72h = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
+  const nowIso = new Date().toISOString();
+
   const [
     { data: todayTasks },
     { data: overdueTasks },
     { data: upcomingGoals },
     { data: areas },
+    { data: upcomingMeetings },
   ] = await Promise.all([
     supabase
       .from("tasks")
@@ -44,9 +48,17 @@ export default async function HomePage() {
       .select("id, name")
       .is("deleted_at", null)
       .order("sort_order", { ascending: true }),
+    supabase
+      .from("meetings")
+      .select("id, title, starts_at, location")
+      .is("deleted_at", null)
+      .gte("starts_at", nowIso)
+      .lte("starts_at", in72h)
+      .order("starts_at", { ascending: true }),
   ]);
 
   const t = await getTranslations("home");
+  const tMeetings = await getTranslations("meetings");
 
   return (
     <div className="flex flex-1 flex-col gap-8 p-4 sm:p-6">
@@ -125,6 +137,40 @@ export default async function HomePage() {
           </ul>
         ) : (
           <p className="text-sm text-muted-foreground">{t("noUpcoming")}</p>
+        )}
+      </section>
+
+      <section>
+        <h2 className="mb-3 text-sm font-semibold text-foreground">
+          {tMeetings("upcoming")}
+        </h2>
+        {upcomingMeetings && upcomingMeetings.length > 0 ? (
+          <ul className="divide-y divide-border rounded-lg border border-border">
+            {upcomingMeetings.map((meeting) => (
+              <li
+                key={meeting.id}
+                className="flex items-center justify-between px-4 py-3"
+              >
+                <span className="text-sm text-foreground">
+                  {meeting.title}
+                  {meeting.location && (
+                    <span className="text-muted-foreground"> · {meeting.location}</span>
+                  )}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {new Date(meeting.starts_at).toLocaleString(undefined, {
+                    weekday: "short",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {tMeetings("noUpcoming")}
+          </p>
         )}
       </section>
     </div>

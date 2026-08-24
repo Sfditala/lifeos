@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Users, Target, FolderKanban, ListTodo, StickyNote } from "lucide-react";
+import { Target, FolderKanban, ListTodo, StickyNote } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import {
   Tabs,
@@ -18,6 +18,7 @@ import { AddNoteDialog } from "@/components/add-note-dialog";
 import { EmptyState } from "@/components/empty-state";
 import { RowMenu } from "@/components/row-menu";
 import { FilesList } from "@/components/files-list";
+import { MeetingsList } from "@/components/meetings-list";
 import { deleteGoal, deleteProject, deleteTask, deleteNote } from "@/lib/actions";
 
 type Document = {
@@ -27,6 +28,14 @@ type Document = {
   size_bytes: number | null;
   storage_path: string;
   uploaded_at: string;
+};
+type Meeting = {
+  id: string;
+  title: string;
+  starts_at: string;
+  ends_at: string | null;
+  location: string | null;
+  notes: string | null;
 };
 type Goal = { id: string; title: string; status: string; target_date: string | null };
 type Project = {
@@ -58,6 +67,7 @@ export function AreaTabs({
   tasks,
   notes,
   documents,
+  meetings,
   overview,
 }: {
   areaId: string;
@@ -68,6 +78,7 @@ export function AreaTabs({
   tasks: Task[];
   notes: Note[];
   documents: Document[];
+  meetings: Meeting[];
   overview: {
     activeProjects: number;
     overdueTasks: number;
@@ -314,7 +325,7 @@ export function AreaTabs({
 
       {showMeetings && (
         <TabsContent value="meetings">
-          <EmptyState icon={Users} message={t("comingSoon")} />
+          <MeetingsList meetings={meetings} lifeAreaId={areaId} />
         </TabsContent>
       )}
 

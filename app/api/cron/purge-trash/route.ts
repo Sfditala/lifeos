@@ -10,6 +10,7 @@ const TABLES = [
   "content_items",
   "knowledge_notes",
   "project_milestones",
+  "meetings",
 ] as const;
 
 const GRACE_DAYS = 30;
