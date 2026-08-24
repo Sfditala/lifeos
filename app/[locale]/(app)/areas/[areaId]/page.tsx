@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { Target, FolderKanban, ListTodo } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { TaskCheckbox } from "@/components/task-checkbox";
@@ -6,6 +7,7 @@ import { StatusBadge, PriorityBadge } from "@/components/status-badge";
 import { AddGoalDialog } from "@/components/add-goal-dialog";
 import { AddProjectDialog } from "@/components/add-project-dialog";
 import { AddTaskDialog } from "@/components/add-task-dialog";
+import { EmptyState } from "@/components/empty-state";
 
 export default async function AreaPage({
   params,
@@ -76,7 +78,11 @@ export default async function AreaPage({
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-muted-foreground">{t("emptyGoals")}</p>
+          <EmptyState
+            icon={Target}
+            message={t("emptyGoals")}
+            action={<AddGoalDialog lifeAreaId={areaId} />}
+          />
         )}
       </section>
 
@@ -103,7 +109,16 @@ export default async function AreaPage({
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-muted-foreground">{t("emptyProjects")}</p>
+          <EmptyState
+            icon={FolderKanban}
+            message={t("emptyProjects")}
+            action={
+              <AddProjectDialog
+                lifeAreaId={areaId}
+                goals={(goals ?? []).map((g) => ({ id: g.id, title: g.title }))}
+              />
+            }
+          />
         )}
       </section>
 
@@ -138,7 +153,16 @@ export default async function AreaPage({
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-muted-foreground">{t("emptyTasks")}</p>
+          <EmptyState
+            icon={ListTodo}
+            message={t("emptyTasks")}
+            action={
+              <AddTaskDialog
+                lifeAreaId={areaId}
+                projects={(projects ?? []).map((p) => ({ id: p.id, name: p.name }))}
+              />
+            }
+          />
         )}
       </section>
     </div>

@@ -1,7 +1,9 @@
+import { Repeat } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { HabitRow } from "@/components/habit-row";
 import { AddHabitDialog } from "@/components/add-habit-dialog";
+import { EmptyState } from "@/components/empty-state";
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -77,7 +79,11 @@ export default async function HabitsPage() {
           })}
         </ul>
       ) : (
-        <p className="text-sm text-muted-foreground">{t("empty")}</p>
+        <EmptyState
+          icon={Repeat}
+          message={t("empty")}
+          action={<AddHabitDialog />}
+        />
       )}
     </div>
   );

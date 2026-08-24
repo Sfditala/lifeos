@@ -3,12 +3,12 @@
     "name": "Life OS"
   },
   "login": {
-    "title": "Sign in",
+    "title": "Enter your email and we'll send you a sign-in link",
     "email": "Email",
-    "password": "Password",
-    "submit": "Sign in",
-    "loading": "Signing in...",
-    "error": "Invalid email or password"
+    "submit": "Send sign-in link",
+    "loading": "Sending...",
+    "error": "Couldn't send the sign-in link, try again",
+    "checkEmail": "Check your email and open the link on this same device to sign in"
   },
   "nav": {
     "logout": "Sign out",

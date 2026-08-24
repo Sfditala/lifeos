@@ -1,88 +1,104 @@
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
-import { Badge } from "@/components/ui/badge";
+import { CalendarMonth } from "@/components/calendar-month";
 
-type CalendarItem = {
-  date: string;
+export type CalendarItem = {
   type: "task" | "goal" | "content";
   label: string;
+  color: string;
 };
 
-export default async function CalendarPage() {
-  const supabase = await createClient();
+function parseMonthParam(month?: string) {
+  const now = new Date();
+  if (month && /^\d{4}-\d{2}$/.test(month)) {
+    const [y, m] = month.split("-").map(Number);
+    return { year: y, month: m };
+  }
+  return { year: now.getFullYear(), month: now.getMonth() + 1 };
+}
 
+function pad(n: number) {
+  return String(n).padStart(2, "0");
+}
+
+export default async function CalendarPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ month?: string }>;
+}) {
+  const { month: monthParam } = await searchParams;
+  const { year, month } = parseMonthParam(monthParam);
+
+  const start = `${year}-${pad(month)}-01`;
+  const lastDay = new Date(year, month, 0).getDate();
+  const end = `${year}-${pad(month)}-${pad(lastDay)}`;
+
+  const supabase = await createClient();
   const [{ data: tasks }, { data: goals }, { data: content }] =
     await Promise.all([
       supabase
         .from("tasks")
-        .select("title, due_date")
-        .not("due_date", "is", null),
+        .select("title, due_date, life_areas(color)")
+        .gte("due_date", start)
+        .lte("due_date", end),
       supabase
         .from("goals")
-        .select("title, target_date")
-        .not("target_date", "is", null),
+        .select("title, target_date, life_areas(color)")
+        .gte("target_date", start)
+        .lte("target_date", end),
       supabase
         .from("content_items")
-        .select("title, scheduled_date")
-        .not("scheduled_date", "is", null),
+        .select("title, scheduled_date, life_areas(color)")
+        .gte("scheduled_date", start)
+        .lte("scheduled_date", end),
     ]);
 
-  const items: CalendarItem[] = [
-    ...(tasks ?? []).map((t) => ({
-      date: t.due_date as string,
-      type: "task" as const,
-      label: t.title,
-    })),
-    ...(goals ?? []).map((g) => ({
-      date: g.target_date as string,
-      type: "goal" as const,
-      label: g.title,
-    })),
-    ...(content ?? []).map((c) => ({
-      date: c.scheduled_date as string,
-      type: "content" as const,
-      label: c.title,
-    })),
-  ].sort((a, b) => a.date.localeCompare(b.date));
+  const t = await getTranslations("calendar");
 
-  const grouped = new Map<string, CalendarItem[]>();
-  for (const item of items) {
-    if (!grouped.has(item.date)) grouped.set(item.date, []);
-    grouped.get(item.date)!.push(item);
+  const itemsByDate = new Map<string, CalendarItem[]>();
+
+  function addItem(
+    date: string | null,
+    type: CalendarItem["type"],
+    label: string,
+    color: string | null | undefined,
+  ) {
+    if (!date) return;
+    if (!itemsByDate.has(date)) itemsByDate.set(date, []);
+    itemsByDate
+      .get(date)!
+      .push({ type, label, color: color ?? "var(--muted-foreground)" });
   }
 
-  const t = await getTranslations("calendar");
+  for (const task of tasks ?? []) {
+    addItem(task.due_date, "task", task.title, task.life_areas?.[0]?.color);
+  }
+  for (const goal of goals ?? []) {
+    addItem(goal.target_date, "goal", goal.title, goal.life_areas?.[0]?.color);
+  }
+  for (const item of content ?? []) {
+    addItem(
+      item.scheduled_date,
+      "content",
+      item.title,
+      item.life_areas?.[0]?.color,
+    );
+  }
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 sm:p-6">
       <h1 className="text-2xl font-semibold text-foreground">{t("title")}</h1>
-
-      {grouped.size > 0 ? (
-        <div className="space-y-6">
-          {Array.from(grouped.entries()).map(([date, dayItems]) => (
-            <div key={date}>
-              <h2 className="mb-2 text-sm font-semibold text-foreground">
-                {date}
-              </h2>
-              <ul className="divide-y divide-border rounded-lg border border-border">
-                {dayItems.map((item, index) => (
-                  <li
-                    key={`${date}-${index}`}
-                    className="flex items-center gap-3 px-4 py-3"
-                  >
-                    <Badge variant="outline">{t(item.type)}</Badge>
-                    <span className="text-sm text-foreground">
-                      {item.label}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-sm text-muted-foreground">{t("empty")}</p>
-      )}
+      <CalendarMonth
+        year={year}
+        month={month}
+        itemsByDate={Object.fromEntries(itemsByDate)}
+        labels={{
+          task: t("task"),
+          goal: t("goal"),
+          content: t("content"),
+          empty: t("empty"),
+        }}
+      />
     </div>
   );
 }

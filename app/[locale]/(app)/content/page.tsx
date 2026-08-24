@@ -1,7 +1,9 @@
+import { Newspaper } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { AddContentDialog } from "@/components/add-content-dialog";
 import { ContentStatusSelect } from "@/components/content-status-select";
+import { EmptyState } from "@/components/empty-state";
 
 export default async function ContentPage() {
   const supabase = await createClient();
@@ -9,7 +11,7 @@ export default async function ContentPage() {
   const [{ data: items }, { data: projects }] = await Promise.all([
     supabase
       .from("content_items")
-      .select("id, title, status, scheduled_date")
+      .select("id, title, status, scheduled_date, life_areas(color)")
       .order("created_at", { ascending: false }),
     supabase
       .from("projects")
@@ -35,6 +37,13 @@ export default async function ContentPage() {
               key={item.id}
               className="flex items-center gap-3 px-4 py-3"
             >
+              <span
+                className="h-2 w-2 shrink-0 rounded-full"
+                style={{
+                  backgroundColor:
+                    item.life_areas?.[0]?.color ?? "var(--muted-foreground)",
+                }}
+              />
               <span className="flex-1 text-sm text-foreground">
                 {item.title}
               </span>
@@ -48,7 +57,11 @@ export default async function ContentPage() {
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-muted-foreground">{t("empty")}</p>
+        <EmptyState
+          icon={Newspaper}
+          message={t("empty")}
+          action={<AddContentDialog projects={projects ?? []} />}
+        />
       )}
     </div>
   );

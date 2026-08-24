@@ -1,8 +1,10 @@
+import { ClipboardList } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/empty-state";
 
 export default async function ReviewsPage() {
   const supabase = await createClient();
@@ -13,24 +15,28 @@ export default async function ReviewsPage() {
 
   const t = await getTranslations("reviews");
 
+  const newReviewButtons = (
+    <div className="flex gap-2">
+      <Button
+        size="sm"
+        variant="outline"
+        render={<Link href="/reviews/new?type=daily" />}
+      >
+        {t("newDaily")}
+      </Button>
+      <Button size="sm" render={<Link href="/reviews/new?type=weekly" />}>
+        {t("newWeekly")}
+      </Button>
+    </div>
+  );
+
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 sm:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-semibold text-foreground">
           {t("title")}
         </h1>
-        <div className="flex gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            render={<Link href="/reviews/new?type=daily" />}
-          >
-            {t("newDaily")}
-          </Button>
-          <Button size="sm" render={<Link href="/reviews/new?type=weekly" />}>
-            {t("newWeekly")}
-          </Button>
-        </div>
+        {newReviewButtons}
       </div>
 
       {reviews && reviews.length > 0 ? (
@@ -52,7 +58,11 @@ export default async function ReviewsPage() {
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-muted-foreground">{t("empty")}</p>
+        <EmptyState
+          icon={ClipboardList}
+          message={t("empty")}
+          action={newReviewButtons}
+        />
       )}
     </div>
   );

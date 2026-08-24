@@ -1,7 +1,9 @@
+import { StickyNote, SearchX } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { AddNoteDialog } from "@/components/add-note-dialog";
 import { NotesSearch } from "@/components/notes-search";
+import { EmptyState } from "@/components/empty-state";
 
 export default async function NotesPage({
   searchParams,
@@ -51,10 +53,14 @@ export default async function NotesPage({
             </li>
           ))}
         </ul>
+      ) : q ? (
+        <EmptyState icon={SearchX} message={t("noResults")} />
       ) : (
-        <p className="text-sm text-muted-foreground">
-          {q ? t("noResults") : t("empty")}
-        </p>
+        <EmptyState
+          icon={StickyNote}
+          message={t("empty")}
+          action={<AddNoteDialog />}
+        />
       )}
     </div>
   );

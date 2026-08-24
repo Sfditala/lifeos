@@ -10,7 +10,13 @@ type LifeArea = {
   color: string | null;
 };
 
-export function NavLinks({ areas }: { areas: LifeArea[] }) {
+export function NavLinks({
+  areas,
+  onNavigate,
+}: {
+  areas: LifeArea[];
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
   const t = useTranslations("nav");
 
@@ -18,6 +24,7 @@ export function NavLinks({ areas }: { areas: LifeArea[] }) {
     <nav className="flex flex-col gap-1">
       <Link
         href="/"
+        onClick={onNavigate}
         className={`rounded-md px-3 py-2 text-sm transition-colors ${
           pathname === "/"
             ? "bg-accent text-accent-foreground"
@@ -36,6 +43,7 @@ export function NavLinks({ areas }: { areas: LifeArea[] }) {
         <Link
           key={item.href}
           href={item.href}
+          onClick={onNavigate}
           className={`rounded-md px-3 py-2 text-sm transition-colors ${
             pathname === item.href
               ? "bg-accent text-accent-foreground"
@@ -58,6 +66,7 @@ export function NavLinks({ areas }: { areas: LifeArea[] }) {
           <Link
             key={area.id}
             href={href}
+            onClick={onNavigate}
             className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors ${
               active
                 ? "bg-accent text-accent-foreground"
