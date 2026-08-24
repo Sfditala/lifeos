@@ -3,11 +3,10 @@
 import { useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { Plus } from "lucide-react";
-import { createNote } from "@/lib/actions";
+import { createMilestone } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -17,8 +16,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-export function AddNoteDialog({ lifeAreaId }: { lifeAreaId?: string } = {}) {
-  const t = useTranslations("notes");
+export function AddMilestoneDialog({ projectId }: { projectId: string }) {
+  const t = useTranslations("project");
   const tCommon = useTranslations("common");
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
@@ -29,7 +28,7 @@ export function AddNoteDialog({ lifeAreaId }: { lifeAreaId?: string } = {}) {
     if (!formRef.current) return;
     setPending(true);
     const formData = new FormData(formRef.current);
-    await createNote(formData);
+    await createMilestone(formData);
     setPending(false);
     setOpen(false);
     formRef.current.reset();
@@ -37,25 +36,23 @@ export function AddNoteDialog({ lifeAreaId }: { lifeAreaId?: string } = {}) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button size="sm" />}>
+      <DialogTrigger render={<Button size="sm" variant="outline" />}>
         <Plus className="h-4 w-4" />
-        {t("addNote")}
+        {t("addMilestone")}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("newNoteTitle")}</DialogTitle>
+          <DialogTitle>{t("newMilestoneTitle")}</DialogTitle>
         </DialogHeader>
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
-          {lifeAreaId && (
-            <input type="hidden" name="life_area_id" value={lifeAreaId} />
-          )}
+          <input type="hidden" name="project_id" value={projectId} />
           <div className="space-y-1">
-            <Label htmlFor="note-title">{tCommon("title")}</Label>
-            <Input id="note-title" name="title" required autoFocus />
+            <Label htmlFor="milestone-title">{tCommon("title")}</Label>
+            <Input id="milestone-title" name="title" required autoFocus />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="note-body">{t("body")}</Label>
-            <Textarea id="note-body" name="body" required rows={6} />
+            <Label htmlFor="milestone-due-date">{tCommon("dueDate")}</Label>
+            <Input id="milestone-due-date" name="due_date" type="date" />
           </div>
           <DialogFooter>
             <Button type="submit" disabled={pending}>

@@ -7,6 +7,7 @@ import { createProject } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -57,6 +58,14 @@ export function AddProjectDialog({
           <div className="space-y-1">
             <Label htmlFor="project-name">{tCommon("name")}</Label>
             <Input id="project-name" name="name" required autoFocus />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="project-description">{tCommon("description")}</Label>
+            <Textarea id="project-description" name="description" rows={2} />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="project-due-date">{tCommon("dueDate")}</Label>
+            <Input id="project-due-date" name="due_date" type="date" />
           </div>
           {goals.length > 0 && (
             <div className="space-y-1">

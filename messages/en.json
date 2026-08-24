@@ -39,7 +39,8 @@
     "goal": "Goal",
     "color": "Color",
     "none": "None",
-    "export": "Export my data"
+    "export": "Export my data",
+    "description": "Description"
   },
   "status": {
     "active": "Active",
@@ -73,7 +74,22 @@
     "newAreaTitle": "New life area",
     "newGoalTitle": "New goal",
     "newProjectTitle": "New project",
-    "newTaskTitle": "New task"
+    "newTaskTitle": "New task",
+    "overview": "Overview",
+    "meetings": "Meetings",
+    "files": "Files",
+    "comingSoon": "Coming soon",
+    "activeProjects": "Active projects",
+    "overdueTasks": "Overdue tasks",
+    "latestNote": "Latest note",
+    "emptyNotes": "No notes for this area yet"
+  },
+  "project": {
+    "dueDate": "Due date",
+    "milestones": "Milestones",
+    "addMilestone": "Add milestone",
+    "newMilestoneTitle": "New milestone",
+    "emptyMilestones": "No milestones yet"
   },
   "home": {
     "welcome": "Welcome",

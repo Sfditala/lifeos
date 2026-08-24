@@ -314,10 +314,52 @@ export type Database = {
         }
         Relationships: []
       }
+      project_milestones: {
+        Row: {
+          created_at: string | null
+          done: boolean
+          due_date: string | null
+          id: string
+          project_id: string
+          sort_order: number | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          done?: boolean
+          due_date?: string | null
+          id?: string
+          project_id: string
+          sort_order?: number | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          done?: boolean
+          due_date?: string | null
+          id?: string
+          project_id?: string
+          sort_order?: number | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_milestones_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           created_at: string | null
           description: string | null
+          due_date: string | null
           goal_id: string | null
           id: string
           life_area_id: string
@@ -328,6 +370,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           description?: string | null
+          due_date?: string | null
           goal_id?: string | null
           id?: string
           life_area_id: string
@@ -338,6 +381,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           description?: string | null
+          due_date?: string | null
           goal_id?: string | null
           id?: string
           life_area_id?: string

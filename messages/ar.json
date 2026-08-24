@@ -39,7 +39,8 @@
     "goal": "الهدف",
     "color": "اللون",
     "none": "بدون",
-    "export": "تصدير بياناتي"
+    "export": "تصدير بياناتي",
+    "description": "الوصف"
   },
   "status": {
     "active": "نشط",
@@ -73,7 +74,22 @@
     "newAreaTitle": "مجال حياة جديد",
     "newGoalTitle": "هدف جديد",
     "newProjectTitle": "مشروع جديد",
-    "newTaskTitle": "مهمة جديدة"
+    "newTaskTitle": "مهمة جديدة",
+    "overview": "نظرة عامة",
+    "meetings": "اجتماعات",
+    "files": "ملفات",
+    "comingSoon": "قريبًا — قيد الإنشاء",
+    "activeProjects": "مشاريع نشطة",
+    "overdueTasks": "مهام متأخرة",
+    "latestNote": "آخر ملاحظة",
+    "emptyNotes": "لا يوجد ملاحظات لهذا المجال بعد"
+  },
+  "project": {
+    "dueDate": "تاريخ الاستحقاق",
+    "milestones": "معالم رئيسية",
+    "addMilestone": "إضافة معلم",
+    "newMilestoneTitle": "معلم جديد",
+    "emptyMilestones": "لا يوجد معالم رئيسية بعد"
   },
   "home": {
     "welcome": "أهلاً بك",

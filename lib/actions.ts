@@ -70,6 +70,8 @@ export async function createProject(formData: FormData) {
   const lifeAreaId = str(formData, "life_area_id");
   const goalId = str(formData, "goal_id");
   const name = str(formData, "name");
+  const description = str(formData, "description");
+  const dueDate = str(formData, "due_date");
   if (!lifeAreaId || !name) throw new Error("Missing fields");
 
   const { error } = await supabase.from("projects").insert({
@@ -77,6 +79,8 @@ export async function createProject(formData: FormData) {
     life_area_id: lifeAreaId,
     goal_id: goalId,
     name,
+    description,
+    due_date: dueDate,
   });
   if (error) throw error;
 
@@ -220,16 +224,18 @@ export async function createNote(formData: FormData) {
   const { supabase, userId } = await requireUserId();
   const title = str(formData, "title");
   const body = str(formData, "body");
+  const lifeAreaId = str(formData, "life_area_id");
   if (!title || !body) throw new Error("Missing fields");
 
   const { error } = await supabase.from("knowledge_notes").insert({
     user_id: userId,
     title,
     body,
+    life_area_id: lifeAreaId,
   });
   if (error) throw error;
 
-  revalidatePath("/notes", "layout");
+  revalidatePath("/", "layout");
 }
 
 // --- Reviews ---
@@ -269,4 +275,34 @@ export async function createReview(formData: FormData) {
 
   revalidatePath("/reviews", "layout");
   return review.id;
+}
+
+// --- Project milestones ---
+
+export async function createMilestone(formData: FormData) {
+  const { supabase, userId } = await requireUserId();
+  const projectId = str(formData, "project_id");
+  const title = str(formData, "title");
+  const dueDate = str(formData, "due_date");
+  if (!projectId || !title) throw new Error("Missing fields");
+
+  const { error } = await supabase.from("project_milestones").insert({
+    user_id: userId,
+    project_id: projectId,
+    title,
+    due_date: dueDate,
+  });
+  if (error) throw error;
+
+  revalidatePath("/", "layout");
+}
+
+export async function toggleMilestoneDone(milestoneId: string, done: boolean) {
+  const { supabase } = await requireUserId();
+  const { error } = await supabase
+    .from("project_milestones")
+    .update({ done })
+    .eq("id", milestoneId);
+  if (error) throw error;
+  revalidatePath("/", "layout");
 }
