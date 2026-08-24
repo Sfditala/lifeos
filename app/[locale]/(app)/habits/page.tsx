@@ -1,7 +1,7 @@
 import { Repeat } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
-import { HabitRow } from "@/components/habit-row";
+import { HabitWeekRow } from "@/components/habit-week-row";
 import { AddHabitDialog } from "@/components/add-habit-dialog";
 import { EmptyState } from "@/components/empty-state";
 
@@ -9,11 +9,33 @@ function todayIso() {
   return new Date().toISOString().slice(0, 10);
 }
 
+function pad(n: number) {
+  return String(n).padStart(2, "0");
+}
+
+function toIso(d: Date) {
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+// Week runs Saturday -> Friday, matching the calendar page's convention.
+function currentWeekDates() {
+  const now = new Date();
+  const jsDay = now.getDay(); // 0=Sun..6=Sat
+  const sinceSaturday = (jsDay + 1) % 7;
+  const saturday = new Date(now);
+  saturday.setDate(now.getDate() - sinceSaturday);
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(saturday);
+    d.setDate(saturday.getDate() + i);
+    return toIso(d);
+  });
+}
+
 function computeStreak(logDates: Set<string>) {
   let streak = 0;
   const cursor = new Date();
   while (true) {
-    const iso = cursor.toISOString().slice(0, 10);
+    const iso = toIso(cursor);
     if (logDates.has(iso)) {
       streak += 1;
       cursor.setDate(cursor.getDate() - 1);
@@ -27,6 +49,7 @@ function computeStreak(logDates: Set<string>) {
 export default async function HabitsPage() {
   const supabase = await createClient();
   const today = todayIso();
+  const weekDates = currentWeekDates();
 
   const { data: habits } = await supabase
     .from("habits")
@@ -68,13 +91,19 @@ export default async function HabitsPage() {
         <ul className="divide-y divide-border rounded-lg border border-border">
           {habits.map((habit) => {
             const dates = logsByHabit.get(habit.id) ?? new Set<string>();
+            const days = weekDates.map((date) => ({
+              date,
+              done: dates.has(date),
+              isFuture: date > today,
+              isToday: date === today,
+            }));
             return (
-              <HabitRow
+              <HabitWeekRow
                 key={habit.id}
                 habitId={habit.id}
                 name={habit.name}
                 frequency={habit.frequency}
-                doneToday={dates.has(today)}
+                days={days}
                 streak={computeStreak(dates)}
               />
             );

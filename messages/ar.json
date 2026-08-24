@@ -171,6 +171,21 @@
     "empty": "لا يوجد عناصر لهذا اليوم",
     "task": "مهمة",
     "goal": "هدف",
-    "content": "محتوى"
+    "content": "محتوى",
+    "meeting": "اجتماع"
+  },
+  "onboarding": {
+    "title": "أهلاً بك — لنجهّز مجالات حياتك",
+    "subtitle": "اقترحنا لك مجالات شائعة، اختاري اللي يناسبك، وأضيفي أي مجال ثاني تحتاجيه. تقدرين تعدّليها كلها لاحقًا.",
+    "customPlaceholder": "اسم مجال آخر...",
+    "addCustom": "إضافة",
+    "start": "ابدأ",
+    "remove": "حذف",
+    "suggestionHealth": "الصحة واللياقة",
+    "suggestionRelationships": "العلاقات والعائلة",
+    "suggestionFinance": "المال الشخصي",
+    "suggestionGrowth": "التطوير الذاتي والتعلم",
+    "suggestionJob": "الوظيفة",
+    "suggestionCompany": "الشركة / العمل الخاص"
   }
 }

@@ -321,14 +321,22 @@ export async function createHabit(formData: FormData) {
 }
 
 export async function toggleHabitToday(habitId: string, done: boolean) {
-  const { supabase, userId } = await requireUserId();
   const today = new Date().toISOString().slice(0, 10);
+  return toggleHabitLog(habitId, today, done);
+}
+
+export async function toggleHabitLog(
+  habitId: string,
+  date: string,
+  done: boolean,
+) {
+  const { supabase, userId } = await requireUserId();
 
   if (done) {
     const { error } = await supabase
       .from("habit_logs")
       .upsert(
-        { user_id: userId, habit_id: habitId, log_date: today, done: true },
+        { user_id: userId, habit_id: habitId, log_date: date, done: true },
         { onConflict: "habit_id,log_date" },
       );
     if (error) throw error;
@@ -337,7 +345,7 @@ export async function toggleHabitToday(habitId: string, done: boolean) {
       .from("habit_logs")
       .delete()
       .eq("habit_id", habitId)
-      .eq("log_date", today);
+      .eq("log_date", date);
     if (error) throw error;
   }
 
@@ -560,6 +568,39 @@ export async function deleteMilestone(milestoneId: string) {
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", milestoneId);
   if (error) throw error;
+  revalidatePath("/", "layout");
+}
+
+// --- Onboarding ---
+
+export async function completeOnboarding(formData: FormData) {
+  const { supabase, userId } = await requireUserId();
+  const raw = formData.get("areas");
+  if (typeof raw !== "string") throw new Error("Missing areas");
+
+  const areas = JSON.parse(raw) as {
+    name: string;
+    color: string;
+    show_meetings: boolean;
+    show_files: boolean;
+  }[];
+  const cleaned = areas
+    .map((a) => ({ ...a, name: a.name.trim() }))
+    .filter((a) => a.name.length > 0);
+  if (cleaned.length === 0) throw new Error("Pick at least one area");
+
+  const { error } = await supabase.from("life_areas").insert(
+    cleaned.map((a, index) => ({
+      user_id: userId,
+      name: a.name,
+      color: a.color,
+      show_meetings: a.show_meetings,
+      show_files: a.show_files,
+      sort_order: index,
+    })),
+  );
+  if (error) throw error;
+
   revalidatePath("/", "layout");
 }
 

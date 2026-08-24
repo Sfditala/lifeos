@@ -171,6 +171,21 @@
     "empty": "No items on this day",
     "task": "Task",
     "goal": "Goal",
-    "content": "Content"
+    "content": "Content",
+    "meeting": "Meeting"
+  },
+  "onboarding": {
+    "title": "Welcome — let's set up your life areas",
+    "subtitle": "We suggested common areas — pick what fits you, and add any others you need. You can edit all of this later.",
+    "customPlaceholder": "Another area name...",
+    "addCustom": "Add",
+    "start": "Get started",
+    "remove": "Remove",
+    "suggestionHealth": "Health & Fitness",
+    "suggestionRelationships": "Relationships & Family",
+    "suggestionFinance": "Personal Finance",
+    "suggestionGrowth": "Self-Development & Learning",
+    "suggestionJob": "Job",
+    "suggestionCompany": "Company / Own Business"
   }
 }

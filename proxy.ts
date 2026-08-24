@@ -41,6 +41,7 @@ export async function proxy(request: NextRequest) {
     pathname.replace(new RegExp(`^/(${routing.locales.join("|")})`), "") ||
     "/";
   const isLoginPage = pathWithoutLocale === "/login";
+  const isOnboardingPage = pathWithoutLocale === "/onboarding";
 
   if (!user && !isLoginPage) {
     const url = request.nextUrl.clone();
@@ -52,6 +53,30 @@ export async function proxy(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = `/${locale}`;
     return NextResponse.redirect(url);
+  }
+
+  if (user && !isOnboardingPage) {
+    const { count } = await supabase
+      .from("life_areas")
+      .select("id", { count: "exact", head: true })
+      .is("deleted_at", null);
+    if ((count ?? 0) === 0) {
+      const url = request.nextUrl.clone();
+      url.pathname = `/${locale}/onboarding`;
+      return NextResponse.redirect(url);
+    }
+  }
+
+  if (user && isOnboardingPage) {
+    const { count } = await supabase
+      .from("life_areas")
+      .select("id", { count: "exact", head: true })
+      .is("deleted_at", null);
+    if ((count ?? 0) > 0) {
+      const url = request.nextUrl.clone();
+      url.pathname = `/${locale}`;
+      return NextResponse.redirect(url);
+    }
   }
 
   return response;
