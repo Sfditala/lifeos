@@ -8,6 +8,7 @@ import { LIFE_AREA_PALETTE } from "@/lib/palette";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +18,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-type Initial = { id: string; name: string; color: string | null };
+type Initial = {
+  id: string;
+  name: string;
+  color: string | null;
+  show_meetings?: boolean;
+  show_files?: boolean;
+};
 
 export function AddLifeAreaDialog({
   initial,
@@ -98,6 +105,24 @@ export function AddLifeAreaDialog({
                 />
               ))}
             </div>
+          </div>
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm text-foreground">
+              <Checkbox
+                name="show_meetings"
+                value="on"
+                defaultChecked={initial?.show_meetings ?? false}
+              />
+              {t("showMeetingsTab")}
+            </label>
+            <label className="flex items-center gap-2 text-sm text-foreground">
+              <Checkbox
+                name="show_files"
+                value="on"
+                defaultChecked={initial?.show_files ?? false}
+              />
+              {t("showFilesTab")}
+            </label>
           </div>
           <DialogFooter>
             <Button type="submit" disabled={pending}>

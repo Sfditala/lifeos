@@ -10,6 +10,8 @@ type LifeArea = {
   id: string;
   name: string;
   color: string | null;
+  show_meetings: boolean;
+  show_files: boolean;
   projectCount: number;
   taskCount: number;
 };
@@ -102,7 +104,13 @@ export function NavLinks({
               onDelete={() => deleteLifeArea(area.id)}
               renderEdit={(open, onOpenChange) => (
                 <AddLifeAreaDialog
-                  initial={{ id: area.id, name: area.name, color: area.color }}
+                  initial={{
+                    id: area.id,
+                    name: area.name,
+                    color: area.color,
+                    show_meetings: area.show_meetings,
+                    show_files: area.show_files,
+                  }}
                   open={open}
                   onOpenChange={onOpenChange}
                 />

@@ -14,7 +14,7 @@ async function getLifeAreas() {
     await Promise.all([
       supabase
         .from("life_areas")
-        .select("id, name, color")
+        .select("id, name, color, show_meetings, show_files")
         .is("deleted_at", null)
         .order("sort_order", { ascending: true }),
       supabase

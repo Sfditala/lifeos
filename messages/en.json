@@ -100,7 +100,9 @@
     "activeProjects": "Active projects",
     "overdueTasks": "Overdue tasks",
     "latestNote": "Latest note",
-    "emptyNotes": "No notes for this area yet"
+    "emptyNotes": "No notes for this area yet",
+    "showMeetingsTab": "Does this area need a Meetings tab?",
+    "showFilesTab": "Does this area need a Files tab?"
   },
   "project": {
     "dueDate": "Due date",

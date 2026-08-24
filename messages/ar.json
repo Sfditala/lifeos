@@ -100,7 +100,9 @@
     "activeProjects": "مشاريع نشطة",
     "overdueTasks": "مهام متأخرة",
     "latestNote": "آخر ملاحظة",
-    "emptyNotes": "لا يوجد ملاحظات لهذا المجال بعد"
+    "emptyNotes": "لا يوجد ملاحظات لهذا المجال بعد",
+    "showMeetingsTab": "يحتاج هذا المجال تبويب اجتماعات؟",
+    "showFilesTab": "يحتاج هذا المجال تبويب ملفات؟"
   },
   "project": {
     "dueDate": "تاريخ الاستحقاق",

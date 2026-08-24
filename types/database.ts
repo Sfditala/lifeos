@@ -306,6 +306,8 @@ export type Database = {
           deleted_at: string | null
           id: string
           name: string
+          show_files: boolean
+          show_meetings: boolean
           sort_order: number | null
           user_id: string
         }
@@ -315,6 +317,8 @@ export type Database = {
           deleted_at?: string | null
           id?: string
           name: string
+          show_files?: boolean
+          show_meetings?: boolean
           sort_order?: number | null
           user_id: string
         }
@@ -324,6 +328,8 @@ export type Database = {
           deleted_at?: string | null
           id?: string
           name?: string
+          show_files?: boolean
+          show_meetings?: boolean
           sort_order?: number | null
           user_id?: string
         }

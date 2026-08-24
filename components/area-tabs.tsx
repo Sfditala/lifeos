@@ -42,6 +42,8 @@ type Note = { id: string; title: string; body: string };
 
 export function AreaTabs({
   areaId,
+  showMeetings,
+  showFiles,
   goals,
   projects,
   tasks,
@@ -49,6 +51,8 @@ export function AreaTabs({
   overview,
 }: {
   areaId: string;
+  showMeetings: boolean;
+  showFiles: boolean;
   goals: Goal[];
   projects: Project[];
   tasks: Task[];
@@ -70,8 +74,10 @@ export function AreaTabs({
         <TabsTrigger value="projects">{t("projects")}</TabsTrigger>
         <TabsTrigger value="tasks">{t("tasks")}</TabsTrigger>
         <TabsTrigger value="notes">{t("notes")}</TabsTrigger>
-        <TabsTrigger value="meetings">{t("meetings")}</TabsTrigger>
-        <TabsTrigger value="files">{t("files")}</TabsTrigger>
+        {showMeetings && (
+          <TabsTrigger value="meetings">{t("meetings")}</TabsTrigger>
+        )}
+        {showFiles && <TabsTrigger value="files">{t("files")}</TabsTrigger>}
       </TabsList>
 
       <TabsContent value="overview">
@@ -295,13 +301,17 @@ export function AreaTabs({
         )}
       </TabsContent>
 
-      <TabsContent value="meetings">
-        <EmptyState icon={Users} message={t("comingSoon")} />
-      </TabsContent>
+      {showMeetings && (
+        <TabsContent value="meetings">
+          <EmptyState icon={Users} message={t("comingSoon")} />
+        </TabsContent>
+      )}
 
-      <TabsContent value="files">
-        <EmptyState icon={FileBox} message={t("comingSoon")} />
-      </TabsContent>
+      {showFiles && (
+        <TabsContent value="files">
+          <EmptyState icon={FileBox} message={t("comingSoon")} />
+        </TabsContent>
+      )}
     </Tabs>
   );
 }

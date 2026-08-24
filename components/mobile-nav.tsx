@@ -15,6 +15,8 @@ type LifeArea = {
   id: string;
   name: string;
   color: string | null;
+  show_meetings: boolean;
+  show_files: boolean;
   projectCount: number;
   taskCount: number;
 };

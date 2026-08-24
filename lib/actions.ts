@@ -23,11 +23,17 @@ export async function createLifeArea(formData: FormData) {
   const { supabase, userId } = await requireUserId();
   const name = str(formData, "name");
   const color = str(formData, "color");
+  const showMeetings = formData.get("show_meetings") === "on";
+  const showFiles = formData.get("show_files") === "on";
   if (!name) throw new Error("Name is required");
 
-  const { error } = await supabase
-    .from("life_areas")
-    .insert({ user_id: userId, name, color });
+  const { error } = await supabase.from("life_areas").insert({
+    user_id: userId,
+    name,
+    color,
+    show_meetings: showMeetings,
+    show_files: showFiles,
+  });
   if (error) throw error;
 
   revalidatePath("/", "layout");
@@ -37,11 +43,18 @@ export async function updateLifeArea(areaId: string, formData: FormData) {
   const { supabase } = await requireUserId();
   const name = str(formData, "name");
   const color = str(formData, "color");
+  const showMeetings = formData.get("show_meetings") === "on";
+  const showFiles = formData.get("show_files") === "on";
   if (!name) throw new Error("Name is required");
 
   const { error } = await supabase
     .from("life_areas")
-    .update({ name, color })
+    .update({
+      name,
+      color,
+      show_meetings: showMeetings,
+      show_files: showFiles,
+    })
     .eq("id", areaId);
   if (error) throw error;
 

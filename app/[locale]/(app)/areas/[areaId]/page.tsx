@@ -25,7 +25,7 @@ export default async function AreaPage({
   ] = await Promise.all([
     supabase
       .from("life_areas")
-      .select("id, name, color")
+      .select("id, name, color, show_meetings, show_files")
       .eq("id", areaId)
       .is("deleted_at", null)
       .single(),
@@ -97,6 +97,8 @@ export default async function AreaPage({
 
       <AreaTabs
         areaId={areaId}
+        showMeetings={area.show_meetings}
+        showFiles={area.show_files}
         goals={goals ?? []}
         projects={(projects ?? []).map((p) => ({
           ...p,
