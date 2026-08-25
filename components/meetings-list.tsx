@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Users } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { RowMenu } from "@/components/row-menu";
@@ -27,6 +27,11 @@ export function MeetingsList({
 }) {
   const t = useTranslations("meetings");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
+  const dateTimeFormatter = new Intl.DateTimeFormat(
+    locale === "ar" ? "ar-u-nu-latn" : "en",
+    { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" },
+  );
   const todayIso = new Date().toISOString().slice(0, 10);
 
   return (
@@ -50,12 +55,7 @@ export function MeetingsList({
                   className={`text-xs ${isToday ? "font-medium text-primary" : "text-muted-foreground"}`}
                 >
                   {isToday ? t("today") + " · " : ""}
-                  {new Date(meeting.starts_at).toLocaleString(undefined, {
-                    month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {dateTimeFormatter.format(new Date(meeting.starts_at))}
                 </span>
                 <RowMenu
                   deleteTitle={tCommon("confirmDeleteTitle")}

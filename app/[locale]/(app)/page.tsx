@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { TaskCheckbox } from "@/components/task-checkbox";
 import { QuickAddTask } from "@/components/quick-add-task";
@@ -94,6 +94,14 @@ export default async function HomePage() {
   const t = await getTranslations("home");
   const tMeetings = await getTranslations("meetings");
   const tFinance = await getTranslations("finance");
+  const locale = await getLocale();
+  const nuLocale = locale === "ar" ? "ar-u-nu-latn" : "en";
+  const numberFormatter = new Intl.NumberFormat(nuLocale);
+  const meetingTimeFormatter = new Intl.DateTimeFormat(nuLocale, {
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
   return (
     <div className="flex flex-1 flex-col gap-8 p-4 sm:p-6">
@@ -114,7 +122,7 @@ export default async function HomePage() {
             {dueRecurring.map((tx) => (
               <li key={tx.id}>
                 <Badge variant="outline">
-                  {tx.label} · {tx.amount.toLocaleString()} {tx.currency} ·{" "}
+                  {tx.label} · {numberFormatter.format(tx.amount)} {tx.currency} ·{" "}
                   {tx.dueDate}
                 </Badge>
               </li>
@@ -211,11 +219,7 @@ export default async function HomePage() {
                   )}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  {new Date(meeting.starts_at).toLocaleString(undefined, {
-                    weekday: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {meetingTimeFormatter.format(new Date(meeting.starts_at))}
                 </span>
               </li>
             ))}

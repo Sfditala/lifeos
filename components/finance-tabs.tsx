@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Wallet, Receipt, PiggyBank, Target, Trash2 } from "lucide-react";
 import {
   Tabs,
@@ -69,6 +69,10 @@ export function FinanceTabs({
 }) {
   const t = useTranslations("finance");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
+  const numberFormatter = new Intl.NumberFormat(
+    locale === "ar" ? "ar-u-nu-latn" : "en",
+  );
 
   return (
     <Tabs defaultValue="accounts">
@@ -108,7 +112,7 @@ export function FinanceTabs({
                   />
                 </div>
                 <p className="mt-2 text-lg font-semibold text-foreground">
-                  {a.balance.toLocaleString()} {a.currency}
+                  {numberFormatter.format(a.balance)} {a.currency}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {t(a.type as "cash" | "bank" | "credit" | "savings")}
@@ -148,7 +152,7 @@ export function FinanceTabs({
                   }`}
                 >
                   {tx.direction === "in" ? "+" : "-"}
-                  {tx.amount.toLocaleString()}
+                  {numberFormatter.format(tx.amount)}
                 </span>
                 <Button
                   variant="ghost"
@@ -201,8 +205,8 @@ export function FinanceTabs({
                     </Button>
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {t("spentThisMonth")}: {b.spent.toLocaleString()} /{" "}
-                    {b.monthly_limit.toLocaleString()}
+                    {t("spentThisMonth")}: {numberFormatter.format(b.spent)} /{" "}
+                    {numberFormatter.format(b.monthly_limit)}
                   </p>
                   <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
                     <div
@@ -257,8 +261,8 @@ export function FinanceTabs({
                     />
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {g.current_amount.toLocaleString()} /{" "}
-                    {g.target_amount.toLocaleString()} ({percent}%)
+                    {numberFormatter.format(g.current_amount)} /{" "}
+                    {numberFormatter.format(g.target_amount)} ({percent}%)
                   </p>
                   <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
                     <div
