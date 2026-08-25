@@ -15,6 +15,11 @@ export default async function TrashPage() {
     { data: notes },
     { data: milestones },
     { data: documents },
+    { data: meetings },
+    { data: financeAccounts },
+    { data: transactions },
+    { data: budgets },
+    { data: financialGoals },
   ] = await Promise.all([
     supabase
       .from("life_areas")
@@ -52,6 +57,26 @@ export default async function TrashPage() {
       .from("documents")
       .select("id, file_name, deleted_at")
       .not("deleted_at", "is", null),
+    supabase
+      .from("meetings")
+      .select("id, title, deleted_at")
+      .not("deleted_at", "is", null),
+    supabase
+      .from("finance_accounts")
+      .select("id, name, deleted_at")
+      .not("deleted_at", "is", null),
+    supabase
+      .from("transactions")
+      .select("id, note, category, deleted_at")
+      .not("deleted_at", "is", null),
+    supabase
+      .from("budgets")
+      .select("id, category, deleted_at")
+      .not("deleted_at", "is", null),
+    supabase
+      .from("financial_goals")
+      .select("id, title, deleted_at")
+      .not("deleted_at", "is", null),
   ]);
 
   const t = await getTranslations("trash");
@@ -61,6 +86,8 @@ export default async function TrashPage() {
   const tNotes = await getTranslations("notes");
   const tProject = await getTranslations("project");
   const tFiles = await getTranslations("files");
+  const tMeetings = await getTranslations("meetings");
+  const tFinance = await getTranslations("finance");
   const tCommon = await getTranslations("common");
 
   const rows: TrashRow[] = [
@@ -125,6 +152,41 @@ export default async function TrashPage() {
       id: r.id,
       label: r.file_name,
       typeLabel: tFiles("title"),
+      deletedAt: r.deleted_at as string,
+    })),
+    ...(meetings ?? []).map((r) => ({
+      table: "meetings" as const,
+      id: r.id,
+      label: r.title,
+      typeLabel: tMeetings("title"),
+      deletedAt: r.deleted_at as string,
+    })),
+    ...(financeAccounts ?? []).map((r) => ({
+      table: "finance_accounts" as const,
+      id: r.id,
+      label: r.name,
+      typeLabel: tFinance("account"),
+      deletedAt: r.deleted_at as string,
+    })),
+    ...(transactions ?? []).map((r) => ({
+      table: "transactions" as const,
+      id: r.id,
+      label: r.note || r.category || tFinance("transaction"),
+      typeLabel: tFinance("transaction"),
+      deletedAt: r.deleted_at as string,
+    })),
+    ...(budgets ?? []).map((r) => ({
+      table: "budgets" as const,
+      id: r.id,
+      label: r.category,
+      typeLabel: tFinance("budget"),
+      deletedAt: r.deleted_at as string,
+    })),
+    ...(financialGoals ?? []).map((r) => ({
+      table: "financial_goals" as const,
+      id: r.id,
+      label: r.title,
+      typeLabel: tFinance("financialGoal"),
       deletedAt: r.deleted_at as string,
     })),
   ].sort((a, b) => b.deletedAt.localeCompare(a.deletedAt));

@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { TaskCheckbox } from "@/components/task-checkbox";
 import { QuickAddTask } from "@/components/quick-add-task";
+import { Badge } from "@/components/ui/badge";
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -57,8 +58,42 @@ export default async function HomePage() {
       .order("starts_at", { ascending: true }),
   ]);
 
+  const { data: recurringTx } = await supabase
+    .from("transactions")
+    .select("id, amount, category, note, occurred_at, finance_accounts(currency)")
+    .is("deleted_at", null)
+    .eq("is_recurring", true)
+    .order("occurred_at", { ascending: false });
+
+  const in5Days = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
+  const seenCategory = new Set<string>();
+  const dueRecurring = (recurringTx ?? [])
+    .filter((tx) => {
+      const key = tx.category ?? tx.note ?? tx.id;
+      if (seenCategory.has(key)) return false;
+      seenCategory.add(key);
+      const next = new Date(tx.occurred_at);
+      next.setMonth(next.getMonth() + 1);
+      const nextIso = next.toISOString().slice(0, 10);
+      return nextIso >= today && nextIso <= in5Days;
+    })
+    .map((tx) => {
+      const next = new Date(tx.occurred_at);
+      next.setMonth(next.getMonth() + 1);
+      return {
+        id: tx.id,
+        label: tx.note || tx.category || "—",
+        amount: Number(tx.amount),
+        currency: tx.finance_accounts?.[0]?.currency ?? "",
+        dueDate: next.toISOString().slice(0, 10),
+      };
+    });
+
   const t = await getTranslations("home");
   const tMeetings = await getTranslations("meetings");
+  const tFinance = await getTranslations("finance");
 
   return (
     <div className="flex flex-1 flex-col gap-8 p-4 sm:p-6">
@@ -69,6 +104,24 @@ export default async function HomePage() {
       </div>
 
       <QuickAddTask areas={areas ?? []} />
+
+      {dueRecurring.length > 0 && (
+        <section>
+          <h2 className="mb-3 text-sm font-semibold text-foreground">
+            {tFinance("recurringDue")}
+          </h2>
+          <ul className="flex flex-wrap gap-2">
+            {dueRecurring.map((tx) => (
+              <li key={tx.id}>
+                <Badge variant="outline">
+                  {tx.label} · {tx.amount.toLocaleString()} {tx.currency} ·{" "}
+                  {tx.dueDate}
+                </Badge>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {overdueTasks && overdueTasks.length > 0 && (
         <section>

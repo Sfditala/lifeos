@@ -11,6 +11,10 @@ const TABLES = [
   "knowledge_notes",
   "project_milestones",
   "meetings",
+  "finance_accounts",
+  "transactions",
+  "budgets",
+  "financial_goals",
 ] as const;
 
 const GRACE_DAYS = 30;

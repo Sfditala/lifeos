@@ -39,6 +39,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      budgets: {
+        Row: {
+          category: string
+          created_at: string | null
+          deleted_at: string | null
+          id: string
+          life_area_id: string | null
+          monthly_limit: number
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string
+          life_area_id?: string | null
+          monthly_limit: number
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string
+          life_area_id?: string | null
+          monthly_limit?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budgets_life_area_id_fkey"
+            columns: ["life_area_id"]
+            isOneToOne: false
+            referencedRelation: "life_areas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_items: {
         Row: {
           created_at: string | null
@@ -218,6 +256,72 @@ export type Database = {
           relation_label?: string | null
           to_id?: string
           to_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      finance_accounts: {
+        Row: {
+          created_at: string | null
+          currency: string
+          deleted_at: string | null
+          id: string
+          name: string
+          opening_balance: number
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          currency?: string
+          deleted_at?: string | null
+          id?: string
+          name: string
+          opening_balance?: number
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          currency?: string
+          deleted_at?: string | null
+          id?: string
+          name?: string
+          opening_balance?: number
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      financial_goals: {
+        Row: {
+          created_at: string | null
+          current_amount: number
+          deleted_at: string | null
+          id: string
+          target_amount: number
+          target_date: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_amount?: number
+          deleted_at?: string | null
+          id?: string
+          target_amount: number
+          target_date?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_amount?: number
+          deleted_at?: string | null
+          id?: string
+          target_amount?: number
+          target_date?: string | null
+          title?: string
           user_id?: string
         }
         Relationships: []
@@ -689,6 +793,79 @@ export type Database = {
           },
           {
             foreignKeyName: "tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          account_id: string
+          amount: number
+          category: string | null
+          created_at: string | null
+          deleted_at: string | null
+          direction: string
+          id: string
+          is_recurring: boolean
+          life_area_id: string | null
+          note: string | null
+          occurred_at: string
+          project_id: string | null
+          recurrence_rule: string | null
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          category?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          direction: string
+          id?: string
+          is_recurring?: boolean
+          life_area_id?: string | null
+          note?: string | null
+          occurred_at: string
+          project_id?: string | null
+          recurrence_rule?: string | null
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          category?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          direction?: string
+          id?: string
+          is_recurring?: boolean
+          life_area_id?: string | null
+          note?: string | null
+          occurred_at?: string
+          project_id?: string | null
+          recurrence_rule?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "finance_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_life_area_id_fkey"
+            columns: ["life_area_id"]
+            isOneToOne: false
+            referencedRelation: "life_areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"

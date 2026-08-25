@@ -17,7 +17,12 @@ export type TrashRow = {
     | "content_items"
     | "knowledge_notes"
     | "project_milestones"
-    | "documents";
+    | "documents"
+    | "meetings"
+    | "finance_accounts"
+    | "transactions"
+    | "budgets"
+    | "financial_goals";
   id: string;
   label: string;
   typeLabel: string;

@@ -702,6 +702,8 @@ const ENTITY_CONFIG: Record<string, { table: string; titleColumn: string }> = {
   project_milestone: { table: "project_milestones", titleColumn: "title" },
   document: { table: "documents", titleColumn: "file_name" },
   meeting: { table: "meetings", titleColumn: "title" },
+  finance_account: { table: "finance_accounts", titleColumn: "name" },
+  financial_goal: { table: "financial_goals", titleColumn: "title" },
 };
 
 export type EntitySearchResult = { type: string; id: string; label: string };
@@ -815,6 +817,183 @@ export async function getEntityLinks(
   }));
 }
 
+// --- Finance ---
+
+export async function createFinanceAccount(formData: FormData) {
+  const { supabase, userId } = await requireUserId();
+  const name = str(formData, "name");
+  const type = str(formData, "type") ?? "cash";
+  const currency = str(formData, "currency") ?? "ILS";
+  const openingBalance = Number(str(formData, "opening_balance") ?? "0");
+  if (!name) throw new Error("Name is required");
+
+  const { error } = await supabase.from("finance_accounts").insert({
+    user_id: userId,
+    name,
+    type,
+    currency,
+    opening_balance: openingBalance,
+  });
+  if (error) throw error;
+  revalidatePath("/finance", "layout");
+}
+
+export async function updateFinanceAccount(
+  accountId: string,
+  formData: FormData,
+) {
+  const { supabase } = await requireUserId();
+  const name = str(formData, "name");
+  const type = str(formData, "type") ?? "cash";
+  const currency = str(formData, "currency") ?? "ILS";
+  const openingBalance = Number(str(formData, "opening_balance") ?? "0");
+  if (!name) throw new Error("Name is required");
+
+  const { error } = await supabase
+    .from("finance_accounts")
+    .update({ name, type, currency, opening_balance: openingBalance })
+    .eq("id", accountId);
+  if (error) throw error;
+  revalidatePath("/finance", "layout");
+}
+
+export async function deleteFinanceAccount(accountId: string) {
+  const { supabase } = await requireUserId();
+  const now = new Date().toISOString();
+  const { error: txError } = await supabase
+    .from("transactions")
+    .update({ deleted_at: now })
+    .eq("account_id", accountId)
+    .is("deleted_at", null);
+  if (txError) throw txError;
+  const { error } = await supabase
+    .from("finance_accounts")
+    .update({ deleted_at: now })
+    .eq("id", accountId);
+  if (error) throw error;
+  revalidatePath("/finance", "layout");
+}
+
+export async function createTransaction(formData: FormData) {
+  const { supabase, userId } = await requireUserId();
+  const accountId = str(formData, "account_id");
+  const amount = Number(str(formData, "amount") ?? "0");
+  const direction = str(formData, "direction") ?? "out";
+  const category = str(formData, "category");
+  const occurredAt = str(formData, "occurred_at");
+  const note = str(formData, "note");
+  const lifeAreaId = str(formData, "life_area_id");
+  const isRecurring = formData.get("is_recurring") === "on";
+  const recurrenceRule = str(formData, "recurrence_rule");
+  if (!accountId || !occurredAt || !amount) throw new Error("Missing fields");
+
+  const { error } = await supabase.from("transactions").insert({
+    user_id: userId,
+    account_id: accountId,
+    life_area_id: lifeAreaId,
+    amount: Math.abs(amount),
+    direction,
+    category,
+    occurred_at: occurredAt,
+    note,
+    is_recurring: isRecurring,
+    recurrence_rule: recurrenceRule,
+  });
+  if (error) throw error;
+  revalidatePath("/finance", "layout");
+  revalidatePath("/", "layout");
+}
+
+export async function deleteTransaction(transactionId: string) {
+  const { supabase } = await requireUserId();
+  const { error } = await supabase
+    .from("transactions")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", transactionId);
+  if (error) throw error;
+  revalidatePath("/finance", "layout");
+}
+
+export async function createBudget(formData: FormData) {
+  const { supabase, userId } = await requireUserId();
+  const category = str(formData, "category");
+  const monthlyLimit = Number(str(formData, "monthly_limit") ?? "0");
+  const lifeAreaId = str(formData, "life_area_id");
+  if (!category || !monthlyLimit) throw new Error("Missing fields");
+
+  const { error } = await supabase.from("budgets").insert({
+    user_id: userId,
+    category,
+    monthly_limit: monthlyLimit,
+    life_area_id: lifeAreaId,
+  });
+  if (error) throw error;
+  revalidatePath("/finance", "layout");
+}
+
+export async function deleteBudget(budgetId: string) {
+  const { supabase } = await requireUserId();
+  const { error } = await supabase
+    .from("budgets")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", budgetId);
+  if (error) throw error;
+  revalidatePath("/finance", "layout");
+}
+
+export async function createFinancialGoal(formData: FormData) {
+  const { supabase, userId } = await requireUserId();
+  const title = str(formData, "title");
+  const targetAmount = Number(str(formData, "target_amount") ?? "0");
+  const currentAmount = Number(str(formData, "current_amount") ?? "0");
+  const targetDate = str(formData, "target_date");
+  if (!title || !targetAmount) throw new Error("Missing fields");
+
+  const { error } = await supabase.from("financial_goals").insert({
+    user_id: userId,
+    title,
+    target_amount: targetAmount,
+    current_amount: currentAmount,
+    target_date: targetDate,
+  });
+  if (error) throw error;
+  revalidatePath("/finance", "layout");
+}
+
+export async function updateFinancialGoal(
+  goalId: string,
+  formData: FormData,
+) {
+  const { supabase } = await requireUserId();
+  const title = str(formData, "title");
+  const targetAmount = Number(str(formData, "target_amount") ?? "0");
+  const currentAmount = Number(str(formData, "current_amount") ?? "0");
+  const targetDate = str(formData, "target_date");
+  if (!title || !targetAmount) throw new Error("Missing fields");
+
+  const { error } = await supabase
+    .from("financial_goals")
+    .update({
+      title,
+      target_amount: targetAmount,
+      current_amount: currentAmount,
+      target_date: targetDate,
+    })
+    .eq("id", goalId);
+  if (error) throw error;
+  revalidatePath("/finance", "layout");
+}
+
+export async function deleteFinancialGoal(goalId: string) {
+  const { supabase } = await requireUserId();
+  const { error } = await supabase
+    .from("financial_goals")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", goalId);
+  if (error) throw error;
+  revalidatePath("/finance", "layout");
+}
+
 // --- Onboarding ---
 
 export async function completeOnboarding(formData: FormData) {
@@ -861,6 +1040,10 @@ const TRASH_TABLES = [
   "project_milestones",
   "documents",
   "meetings",
+  "finance_accounts",
+  "transactions",
+  "budgets",
+  "financial_goals",
 ] as const;
 
 type TrashTable = (typeof TRASH_TABLES)[number];
