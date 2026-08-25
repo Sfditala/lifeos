@@ -21,7 +21,6 @@ export default async function AreaPage({
     { data: projects },
     { data: tasks },
     { data: notes },
-    { data: milestones },
     { data: documents },
     { data: meetings },
   ] = await Promise.all([
@@ -56,10 +55,6 @@ export default async function AreaPage({
       .is("deleted_at", null)
       .order("updated_at", { ascending: false }),
     supabase
-      .from("project_milestones")
-      .select("id, project_id")
-      .is("deleted_at", null),
-    supabase
       .from("documents")
       .select("id, file_name, file_type, size_bytes, storage_path, uploaded_at")
       .eq("life_area_id", areaId)
@@ -74,6 +69,16 @@ export default async function AreaPage({
   ]);
 
   if (!area) notFound();
+
+  const projectIds = (projects ?? []).map((p) => p.id);
+  const { data: milestones } =
+    projectIds.length > 0
+      ? await supabase
+          .from("project_milestones")
+          .select("id, project_id")
+          .in("project_id", projectIds)
+          .is("deleted_at", null)
+      : { data: [] as { id: string; project_id: string }[] };
 
   const activeProjects = (projects ?? []).filter(
     (p) => p.status === "active",
