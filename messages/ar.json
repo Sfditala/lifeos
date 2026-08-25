@@ -23,7 +23,8 @@
     "content": "المحتوى",
     "notes": "الملاحظات",
     "reviews": "المراجعات",
-    "finance": "المال"
+    "finance": "المال",
+    "companies": "الفرق والشركات"
   },
   "common": {
     "add": "إضافة",
@@ -40,6 +41,7 @@
     "goal": "الهدف",
     "task": "المهمة",
     "habit": "العادة",
+    "company": "الشركة",
     "color": "اللون",
     "none": "بدون",
     "export": "تصدير بياناتي",
@@ -222,6 +224,28 @@
     "transaction": "حركة مالية",
     "budget": "ميزانية",
     "financialGoal": "هدف مالي"
+  },
+  "team": {
+    "title": "الفرق والشركات",
+    "addCompany": "إضافة شركة",
+    "newCompanyTitle": "شركة جديدة",
+    "empty": "لا يوجد شركات بعد",
+    "members": "الأعضاء",
+    "inviteMember": "دعوة عضو",
+    "inviteEmail": "البريد الإلكتروني للمدعو",
+    "invite": "دعوة",
+    "status_invited": "بانتظار الدخول",
+    "status_active": "نشط",
+    "status_removed": "مُزال",
+    "owner": "المالك",
+    "member": "عضو",
+    "remove": "إزالة",
+    "projects": "المشاريع المشتركة",
+    "emptyProjects": "لا يوجد مشاريع مشتركة بعد",
+    "chat": "الدردشة",
+    "sendMessage": "أرسل رسالة...",
+    "send": "إرسال",
+    "inviteHint": "بعد الدعوة، اطلبي من الشخص يسجّل دخول بنفس هذا الإيميل عبر رابط الدخول — عضويته تتفعّل تلقائيًا."
   },
   "links": {
     "title": "عناصر مرتبطة",

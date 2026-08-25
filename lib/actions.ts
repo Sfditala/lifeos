@@ -1,7 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { createClient as createSupabaseJsClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+
+function createAdminClient() {
+  return createSupabaseJsClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+}
 
 async function requireUserId() {
   const supabase = await createClient();
@@ -152,6 +160,7 @@ export async function createProject(formData: FormData) {
   const name = str(formData, "name");
   const description = str(formData, "description");
   const dueDate = str(formData, "due_date");
+  const companyId = str(formData, "company_id");
   if (!lifeAreaId || !name) throw new Error("Missing fields");
 
   const { error } = await supabase.from("projects").insert({
@@ -161,6 +170,7 @@ export async function createProject(formData: FormData) {
     name,
     description,
     due_date: dueDate,
+    company_id: companyId,
   });
   if (error) throw error;
 
@@ -183,11 +193,18 @@ export async function updateProject(projectId: string, formData: FormData) {
   const description = str(formData, "description");
   const dueDate = str(formData, "due_date");
   const goalId = str(formData, "goal_id");
+  const companyId = str(formData, "company_id");
   if (!name) throw new Error("Name is required");
 
   const { error } = await supabase
     .from("projects")
-    .update({ name, description, due_date: dueDate, goal_id: goalId })
+    .update({
+      name,
+      description,
+      due_date: dueDate,
+      goal_id: goalId,
+      company_id: companyId,
+    })
     .eq("id", projectId);
   if (error) throw error;
 
@@ -704,6 +721,7 @@ const ENTITY_CONFIG: Record<string, { table: string; titleColumn: string }> = {
   meeting: { table: "meetings", titleColumn: "title" },
   finance_account: { table: "finance_accounts", titleColumn: "name" },
   financial_goal: { table: "financial_goals", titleColumn: "title" },
+  company: { table: "companies", titleColumn: "name" },
 };
 
 export type EntitySearchResult = { type: string; id: string; label: string };
@@ -994,6 +1012,124 @@ export async function deleteFinancialGoal(goalId: string) {
   revalidatePath("/finance", "layout");
 }
 
+// --- Team workspace ---
+
+export async function createCompany(formData: FormData) {
+  const { supabase, userId } = await requireUserId();
+  const name = str(formData, "name");
+  if (!name) throw new Error("Name is required");
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data: company, error } = await supabase
+    .from("companies")
+    .insert({ owner_user_id: userId, name })
+    .select("id")
+    .single();
+  if (error) throw error;
+
+  const { error: memberError } = await supabase.from("team_members").insert({
+    company_id: company.id,
+    user_id: userId,
+    email: user?.email ?? "",
+    role: "owner",
+    status: "active",
+    joined_at: new Date().toISOString(),
+  });
+  if (memberError) throw memberError;
+
+  revalidatePath("/companies", "layout");
+  return company.id;
+}
+
+export async function deleteCompany(companyId: string) {
+  const { supabase } = await requireUserId();
+  const { error } = await supabase
+    .from("companies")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", companyId);
+  if (error) throw error;
+  revalidatePath("/companies", "layout");
+}
+
+export async function inviteMember(companyId: string, email: string) {
+  const { supabase } = await requireUserId();
+  const trimmed = email.trim().toLowerCase();
+  if (!trimmed) throw new Error("Email is required");
+
+  const { error } = await supabase.from("team_members").insert({
+    company_id: companyId,
+    email: trimmed,
+    role: "member",
+    status: "invited",
+  });
+  if (error) throw error;
+  revalidatePath("/companies", "layout");
+}
+
+export async function removeMember(memberId: string) {
+  const { supabase } = await requireUserId();
+  const { error } = await supabase
+    .from("team_members")
+    .update({ status: "removed" })
+    .eq("id", memberId);
+  if (error) throw error;
+  revalidatePath("/companies", "layout");
+}
+
+// Runs with the service role so it can bypass RLS safely: the only input that
+// matters is the CURRENT authenticated user's own verified email, never
+// anything supplied by the caller — so it can only ever claim invites
+// addressed to the person who is actually logged in.
+export async function claimTeamInvites() {
+  const { supabase, userId } = await requireUserId();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const email = user?.email?.toLowerCase();
+  if (!email) return;
+
+  const admin = createAdminClient();
+  const { data: pending } = await admin
+    .from("team_members")
+    .select("id")
+    .eq("email", email)
+    .eq("status", "invited")
+    .is("user_id", null);
+  if (!pending || pending.length === 0) return;
+
+  await admin
+    .from("team_members")
+    .update({
+      user_id: userId,
+      status: "active",
+      joined_at: new Date().toISOString(),
+    })
+    .in(
+      "id",
+      pending.map((p) => p.id),
+    );
+}
+
+export async function createProjectMessage(
+  projectId: string,
+  content: string,
+) {
+  const { supabase, userId } = await requireUserId();
+  const trimmed = content.trim();
+  if (!trimmed) throw new Error("Message is required");
+
+  const { error } = await supabase.from("project_messages").insert({
+    project_id: projectId,
+    user_id: userId,
+    content: trimmed,
+  });
+  if (error) throw error;
+  revalidatePath("/", "layout");
+}
+
 // --- Onboarding ---
 
 export async function completeOnboarding(formData: FormData) {
@@ -1044,6 +1180,7 @@ const TRASH_TABLES = [
   "transactions",
   "budgets",
   "financial_goals",
+  "companies",
 ] as const;
 
 type TrashTable = (typeof TRASH_TABLES)[number];

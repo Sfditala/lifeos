@@ -22,7 +22,8 @@ export type TrashRow = {
     | "finance_accounts"
     | "transactions"
     | "budgets"
-    | "financial_goals";
+    | "financial_goals"
+    | "companies";
   id: string;
   label: string;
   typeLabel: string;

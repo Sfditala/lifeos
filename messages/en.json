@@ -23,7 +23,8 @@
     "content": "Content",
     "notes": "Notes",
     "reviews": "Reviews",
-    "finance": "Finance"
+    "finance": "Finance",
+    "companies": "Teams & Companies"
   },
   "common": {
     "add": "Add",
@@ -40,6 +41,7 @@
     "goal": "Goal",
     "task": "Task",
     "habit": "Habit",
+    "company": "Company",
     "color": "Color",
     "none": "None",
     "export": "Export my data",
@@ -222,6 +224,28 @@
     "transaction": "Transaction",
     "budget": "Budget",
     "financialGoal": "Financial goal"
+  },
+  "team": {
+    "title": "Teams & Companies",
+    "addCompany": "Add company",
+    "newCompanyTitle": "New company",
+    "empty": "No companies yet",
+    "members": "Members",
+    "inviteMember": "Invite member",
+    "inviteEmail": "Invitee's email",
+    "invite": "Invite",
+    "status_invited": "Awaiting sign-in",
+    "status_active": "Active",
+    "status_removed": "Removed",
+    "owner": "Owner",
+    "member": "Member",
+    "remove": "Remove",
+    "projects": "Shared projects",
+    "emptyProjects": "No shared projects yet",
+    "chat": "Chat",
+    "sendMessage": "Send a message...",
+    "send": "Send",
+    "inviteHint": "After inviting, ask them to sign in with this exact email via the sign-in link — their membership activates automatically."
   },
   "links": {
     "title": "Linked items",

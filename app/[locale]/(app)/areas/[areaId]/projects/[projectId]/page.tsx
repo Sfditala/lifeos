@@ -10,6 +10,10 @@ export default async function ProjectPage({
 }) {
   const { areaId, projectId } = await params;
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const currentUserId = user?.id ?? "";
 
   const [
     { data: project },
@@ -20,7 +24,7 @@ export default async function ProjectPage({
   ] = await Promise.all([
       supabase
         .from("projects")
-        .select("id, name, description, status, due_date, goal_id")
+        .select("id, name, description, status, due_date, goal_id, company_id")
         .eq("id", projectId)
         .eq("life_area_id", areaId)
         .is("deleted_at", null)
@@ -52,7 +56,43 @@ export default async function ProjectPage({
 
   if (!project) notFound();
 
-  const links = await getEntityLinks("project", projectId);
+  const [links, { data: companies }] = await Promise.all([
+    getEntityLinks("project", projectId),
+    supabase
+      .from("companies")
+      .select("id, name")
+      .eq("owner_user_id", currentUserId)
+      .is("deleted_at", null),
+  ]);
+
+  let messages: {
+    id: string;
+    content: string;
+    created_at: string;
+    user_id: string;
+    authorLabel: string;
+  }[] = [];
+
+  if (project.company_id) {
+    const [{ data: rawMessages }, { data: members }] = await Promise.all([
+      supabase
+        .from("project_messages")
+        .select("id, content, created_at, user_id")
+        .eq("project_id", projectId)
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("team_members")
+        .select("user_id, email")
+        .eq("company_id", project.company_id),
+    ]);
+    const emailByUser = new Map(
+      (members ?? []).map((m) => [m.user_id, m.email]),
+    );
+    messages = (rawMessages ?? []).map((m) => ({
+      ...m,
+      authorLabel: emailByUser.get(m.user_id) ?? "—",
+    }));
+  }
 
   return (
     <ProjectDetail
@@ -63,6 +103,9 @@ export default async function ProjectPage({
       goals={goals ?? []}
       documents={documents ?? []}
       links={links}
+      companies={companies ?? []}
+      messages={messages}
+      currentUserId={currentUserId}
     />
   );
 }

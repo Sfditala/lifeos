@@ -20,6 +20,7 @@ export default async function TrashPage() {
     { data: transactions },
     { data: budgets },
     { data: financialGoals },
+    { data: companies },
   ] = await Promise.all([
     supabase
       .from("life_areas")
@@ -76,6 +77,10 @@ export default async function TrashPage() {
     supabase
       .from("financial_goals")
       .select("id, title, deleted_at")
+      .not("deleted_at", "is", null),
+    supabase
+      .from("companies")
+      .select("id, name, deleted_at")
       .not("deleted_at", "is", null),
   ]);
 
@@ -187,6 +192,13 @@ export default async function TrashPage() {
       id: r.id,
       label: r.title,
       typeLabel: tFinance("financialGoal"),
+      deletedAt: r.deleted_at as string,
+    })),
+    ...(companies ?? []).map((r) => ({
+      table: "companies" as const,
+      id: r.id,
+      label: r.name,
+      typeLabel: tCommon("company"),
       deletedAt: r.deleted_at as string,
     })),
   ].sort((a, b) => b.deletedAt.localeCompare(a.deletedAt));

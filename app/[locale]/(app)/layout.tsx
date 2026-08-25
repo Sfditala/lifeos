@@ -2,6 +2,7 @@ import { Download, LayoutDashboard, Trash2 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { claimTeamInvites } from "@/lib/actions";
 import { NavLinks } from "@/components/nav-links";
 import { MobileNav } from "@/components/mobile-nav";
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -52,6 +53,7 @@ export default async function AppLayout({
 }) {
   const { locale } = await params;
   const sheetSide = locale === "ar" ? "right" : "left";
+  await claimTeamInvites();
   const areas = await getLifeAreas();
   const tApp = await getTranslations("app");
   const tNav = await getTranslations("nav");

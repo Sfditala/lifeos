@@ -13,6 +13,7 @@ import { EmptyState } from "@/components/empty-state";
 import { RowMenu } from "@/components/row-menu";
 import { FilesList } from "@/components/files-list";
 import { LinkedItems } from "@/components/linked-items";
+import { ProjectChat } from "@/components/project-chat";
 import {
   deleteProject,
   deleteMilestone,
@@ -27,6 +28,15 @@ type Project = {
   status: string;
   due_date: string | null;
   goal_id: string | null;
+  company_id: string | null;
+};
+type Company = { id: string; name: string };
+type Message = {
+  id: string;
+  content: string;
+  created_at: string;
+  user_id: string;
+  authorLabel: string;
 };
 type Document = {
   id: string;
@@ -59,6 +69,9 @@ export function ProjectDetail({
   goals,
   documents,
   links,
+  companies,
+  messages,
+  currentUserId,
 }: {
   areaId: string;
   project: Project;
@@ -67,6 +80,9 @@ export function ProjectDetail({
   goals: Goal[];
   documents: Document[];
   links: ResolvedLink[];
+  companies: Company[];
+  messages: Message[];
+  currentUserId: string;
 }) {
   const t = useTranslations("project");
   const tAreas = useTranslations("areas");
@@ -102,6 +118,7 @@ export function ProjectDetail({
               <AddProjectDialog
                 lifeAreaId={areaId}
                 goals={goals}
+                companies={companies}
                 initial={project}
                 open={open}
                 onOpenChange={onOpenChange}
@@ -230,6 +247,16 @@ export function ProjectDetail({
         </h2>
         <FilesList documents={documents} projectId={project.id} />
       </section>
+
+      {project.company_id && (
+        <section>
+          <ProjectChat
+            projectId={project.id}
+            messages={messages}
+            currentUserId={currentUserId}
+          />
+        </section>
+      )}
 
       <section>
         <LinkedItems entityType="project" entityId={project.id} links={links} />

@@ -47,6 +47,7 @@ export function NavLinks({
         { href: "/notes", label: t("notes") },
         { href: "/reviews", label: t("reviews") },
         { href: "/finance", label: t("finance") },
+        { href: "/companies", label: t("companies") },
       ].map((item) => (
         <Link
           key={item.href}

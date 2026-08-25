@@ -18,23 +18,27 @@ import {
 } from "@/components/ui/dialog";
 
 type Goal = { id: string; title: string };
+type Company = { id: string; name: string };
 type Initial = {
   id: string;
   name: string;
   description: string | null;
   due_date: string | null;
   goal_id?: string | null;
+  company_id?: string | null;
 };
 
 export function AddProjectDialog({
   lifeAreaId,
   goals,
+  companies,
   initial,
   open: controlledOpen,
   onOpenChange: setControlledOpen,
 }: {
   lifeAreaId: string;
   goals: Goal[];
+  companies?: Company[];
   initial?: Initial;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -120,6 +124,24 @@ export function AddProjectDialog({
                 {goals.map((goal) => (
                   <option key={goal.id} value={goal.id}>
                     {goal.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          {companies && companies.length > 0 && (
+            <div className="space-y-1">
+              <Label htmlFor="company_id">{tCommon("company")}</Label>
+              <select
+                id="company_id"
+                name="company_id"
+                defaultValue={initial?.company_id ?? ""}
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+              >
+                <option value="">{tCommon("none")}</option>
+                {companies.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
                   </option>
                 ))}
               </select>
