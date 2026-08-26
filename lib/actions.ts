@@ -308,6 +308,7 @@ export async function createTask(formData: FormData) {
   const title = str(formData, "title");
   const dueDate = str(formData, "due_date");
   const priority = str(formData, "priority") ?? "medium";
+  const assignedTo = str(formData, "assigned_to");
   if (!lifeAreaId || !title) throw new Error("Missing fields");
 
   const { error } = await supabase.from("tasks").insert({
@@ -317,6 +318,7 @@ export async function createTask(formData: FormData) {
     title,
     due_date: dueDate,
     priority,
+    assigned_to: assignedTo,
   });
   if (error) throw error;
 
@@ -354,15 +356,20 @@ export async function updateTask(taskId: string, formData: FormData) {
   const projectId = str(formData, "project_id");
   if (!title) throw new Error("Title is required");
 
-  const { error } = await supabase
-    .from("tasks")
-    .update({
-      title,
-      due_date: dueDate,
-      priority,
-      project_id: projectId,
-    })
-    .eq("id", taskId);
+  const updates: Record<string, unknown> = {
+    title,
+    due_date: dueDate,
+    priority,
+    project_id: projectId,
+  };
+  // Only touch assigned_to when the form actually carries the field — the
+  // area-level task editor doesn't show an assignee picker, and re-saving
+  // from there must not silently clear an existing assignment.
+  if (formData.has("assigned_to")) {
+    updates.assigned_to = str(formData, "assigned_to");
+  }
+
+  const { error } = await supabase.from("tasks").update(updates).eq("id", taskId);
   if (error) throw error;
 
   revalidatePath("/", "layout");
@@ -1115,7 +1122,11 @@ export async function deleteCompany(companyId: string) {
   revalidatePath("/companies", "layout");
 }
 
-export async function inviteMember(companyId: string, email: string) {
+export async function inviteMember(
+  companyId: string,
+  email: string,
+  position: string,
+) {
   const { supabase } = await requireUserId();
   const trimmed = email.trim().toLowerCase();
   if (!trimmed) throw new Error("Email is required");
@@ -1125,6 +1136,7 @@ export async function inviteMember(companyId: string, email: string) {
     email: trimmed,
     role: "member",
     status: "invited",
+    position: position || "member",
   });
   if (error) throw error;
   revalidatePath("/companies", "layout");
@@ -1136,6 +1148,41 @@ export async function removeMember(memberId: string) {
     .from("team_members")
     .update({ status: "removed" })
     .eq("id", memberId);
+  if (error) throw error;
+  revalidatePath("/companies", "layout");
+}
+
+export async function updateMemberPosition(memberId: string, position: string) {
+  const { supabase } = await requireUserId();
+  const { error } = await supabase
+    .from("team_members")
+    .update({ position })
+    .eq("id", memberId);
+  if (error) throw error;
+  revalidatePath("/companies", "layout");
+}
+
+export async function updateCompany(companyId: string, formData: FormData) {
+  const { supabase } = await requireUserId();
+  const name = str(formData, "name");
+  const foundedDate = str(formData, "founded_date");
+  const description = str(formData, "description");
+  const industry = str(formData, "industry");
+  const contactEmail = str(formData, "contact_email");
+  const contactPhone = str(formData, "contact_phone");
+  if (!name) throw new Error("Name is required");
+
+  const { error } = await supabase
+    .from("companies")
+    .update({
+      name,
+      founded_date: foundedDate,
+      description,
+      industry,
+      contact_email: contactEmail,
+      contact_phone: contactPhone,
+    })
+    .eq("id", companyId);
   if (error) throw error;
   revalidatePath("/companies", "layout");
 }

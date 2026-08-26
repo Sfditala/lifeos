@@ -37,7 +37,7 @@ export default async function ProjectPage({
         .order("due_date", { ascending: true, nullsFirst: false }),
       supabase
         .from("tasks")
-        .select("id, title, status, priority, due_date")
+        .select("id, title, status, priority, due_date, assigned_to")
         .eq("project_id", projectId)
         .is("deleted_at", null)
         .order("created_at", { ascending: false }),
@@ -72,6 +72,7 @@ export default async function ProjectPage({
     user_id: string;
     authorLabel: string;
   }[] = [];
+  let assignees: { id: string; email: string }[] = [];
 
   if (project.company_id) {
     const [{ data: rawMessages }, { data: members }] = await Promise.all([
@@ -82,7 +83,7 @@ export default async function ProjectPage({
         .order("created_at", { ascending: true }),
       supabase
         .from("team_members")
-        .select("user_id, email")
+        .select("user_id, email, status")
         .eq("company_id", project.company_id),
     ]);
     const emailByUser = new Map(
@@ -92,6 +93,9 @@ export default async function ProjectPage({
       ...m,
       authorLabel: emailByUser.get(m.user_id) ?? "—",
     }));
+    assignees = (members ?? [])
+      .filter((m) => m.status === "active" && m.user_id)
+      .map((m) => ({ id: m.user_id as string, email: m.email }));
   }
 
   return (
@@ -104,6 +108,7 @@ export default async function ProjectPage({
       documents={documents ?? []}
       links={links}
       companies={companies ?? []}
+      assignees={assignees}
       messages={messages}
       currentUserId={currentUserId}
     />

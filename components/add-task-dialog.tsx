@@ -17,28 +17,33 @@ import {
 } from "@/components/ui/dialog";
 
 type Project = { id: string; name: string };
+type Assignee = { id: string; email: string };
 type Initial = {
   id: string;
   title: string;
   due_date: string | null;
   priority: string;
   project_id: string | null;
+  assigned_to?: string | null;
 };
 
 export function AddTaskDialog({
   lifeAreaId,
   projects,
+  assignees,
   initial,
   open: controlledOpen,
   onOpenChange: setControlledOpen,
 }: {
   lifeAreaId: string;
   projects: Project[];
+  assignees?: Assignee[];
   initial?: Initial;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }) {
   const t = useTranslations("areas");
+  const tTeam = useTranslations("team");
   const tCommon = useTranslations("common");
   const tPriority = useTranslations("priority");
   const isControlled = controlledOpen !== undefined;
@@ -126,6 +131,24 @@ export function AddTaskDialog({
                 {projects.map((project) => (
                   <option key={project.id} value={project.id}>
                     {project.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          {assignees && assignees.length > 0 && (
+            <div className="space-y-1">
+              <Label htmlFor="assigned_to">{tTeam("assignTo")}</Label>
+              <select
+                id="assigned_to"
+                name="assigned_to"
+                defaultValue={initial?.assigned_to ?? ""}
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+              >
+                <option value="">{tTeam("unassigned")}</option>
+                {assignees.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.email}
                   </option>
                 ))}
               </select>

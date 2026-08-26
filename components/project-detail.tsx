@@ -59,8 +59,10 @@ type Task = {
   status: string;
   priority: string;
   due_date: string | null;
+  assigned_to: string | null;
 };
 type Goal = { id: string; title: string };
+type Assignee = { id: string; email: string };
 
 export function ProjectDetail({
   areaId,
@@ -71,6 +73,7 @@ export function ProjectDetail({
   documents,
   links,
   companies,
+  assignees,
   messages,
   currentUserId,
 }: {
@@ -82,6 +85,7 @@ export function ProjectDetail({
   documents: Document[];
   links: ResolvedLink[];
   companies: Company[];
+  assignees: Assignee[];
   messages: Message[];
   currentUserId: string;
 }) {
@@ -93,6 +97,7 @@ export function ProjectDetail({
   const router = useRouter();
 
   const projectForTaskDialog = [{ id: project.id, name: project.name }];
+  const emailByAssigneeId = new Map(assignees.map((a) => [a.id, a.email]));
 
   const statusCounts = { todo: 0, doing: 0, done: 0 };
   for (const task of tasks) {
@@ -222,7 +227,11 @@ export function ProjectDetail({
           <h2 className="text-sm font-semibold text-foreground">
             {tAreas("tasks")}
           </h2>
-          <AddTaskDialog lifeAreaId={areaId} projects={projectForTaskDialog} />
+          <AddTaskDialog
+            lifeAreaId={areaId}
+            projects={projectForTaskDialog}
+            assignees={assignees}
+          />
         </div>
         {tasks.length > 0 ? (
           <ul className="divide-y divide-border rounded-lg border border-border">
@@ -232,6 +241,11 @@ export function ProjectDetail({
                 <span className="flex-1 text-sm text-foreground">
                   {task.title}
                 </span>
+                {task.assigned_to && emailByAssigneeId.get(task.assigned_to) && (
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                    {emailByAssigneeId.get(task.assigned_to)}
+                  </span>
+                )}
                 {task.due_date && (
                   <span className="text-xs text-muted-foreground">
                     {task.due_date}
@@ -246,6 +260,7 @@ export function ProjectDetail({
                     <AddTaskDialog
                       lifeAreaId={areaId}
                       projects={projectForTaskDialog}
+                      assignees={assignees}
                       initial={{ ...task, project_id: project.id }}
                       open={open}
                       onOpenChange={onOpenChange}
@@ -263,6 +278,7 @@ export function ProjectDetail({
               <AddTaskDialog
                 lifeAreaId={areaId}
                 projects={projectForTaskDialog}
+                assignees={assignees}
               />
             }
           />

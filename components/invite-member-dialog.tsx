@@ -4,6 +4,7 @@ import { useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { UserPlus } from "lucide-react";
 import { inviteMember } from "@/lib/actions";
+import { TEAM_POSITIONS } from "@/lib/team-positions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,9 +28,11 @@ export function InviteMemberDialog({ companyId }: { companyId: string }) {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!formRef.current) return;
-    const email = new FormData(formRef.current).get("email") as string;
+    const formData = new FormData(formRef.current);
+    const email = formData.get("email") as string;
+    const position = formData.get("position") as string;
     setPending(true);
-    await inviteMember(companyId, email);
+    await inviteMember(companyId, email, position);
     setPending(false);
     setOpen(false);
     formRef.current.reset();
@@ -56,6 +59,21 @@ export function InviteMemberDialog({ companyId }: { companyId: string }) {
               required
               autoFocus
             />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="invite-position">{t("position")}</Label>
+            <select
+              id="invite-position"
+              name="position"
+              defaultValue="member"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+            >
+              {TEAM_POSITIONS.map((p) => (
+                <option key={p} value={p}>
+                  {t(`position_${p}`)}
+                </option>
+              ))}
+            </select>
           </div>
           <DialogFooter>
             <Button type="submit" disabled={pending}>

@@ -6,6 +6,8 @@ import { EmptyState } from "@/components/empty-state";
 import { InviteMemberDialog } from "@/components/invite-member-dialog";
 import { RemoveMemberButton } from "@/components/remove-member-button";
 import { AddCompanyProjectDialog } from "@/components/add-company-project-dialog";
+import { EditCompanyDialog } from "@/components/edit-company-dialog";
+import { MemberPositionSelect } from "@/components/member-position-select";
 import { FolderKanban } from "lucide-react";
 
 export default async function CompanyPage({
@@ -23,13 +25,15 @@ export default async function CompanyPage({
     await Promise.all([
       supabase
         .from("companies")
-        .select("id, name, owner_user_id")
+        .select(
+          "id, name, owner_user_id, founded_date, description, industry, contact_email, contact_phone",
+        )
         .eq("id", companyId)
         .is("deleted_at", null)
         .single(),
       supabase
         .from("team_members")
-        .select("id, email, role, status")
+        .select("id, email, role, status, position")
         .eq("company_id", companyId)
         .order("invited_at", { ascending: true }),
       supabase
@@ -54,9 +58,46 @@ export default async function CompanyPage({
 
   return (
     <div className="flex flex-1 flex-col gap-8 p-4 sm:p-6">
-      <h1 className="text-2xl font-semibold text-foreground">
-        {company.name}
-      </h1>
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold text-foreground">
+          {company.name}
+        </h1>
+        {isOwner && <EditCompanyDialog company={company} />}
+      </div>
+
+      {(company.description ||
+        company.industry ||
+        company.founded_date ||
+        company.contact_email ||
+        company.contact_phone) && (
+        <section className="grid gap-3 rounded-lg border border-border bg-card p-4 sm:grid-cols-2">
+          {company.description && (
+            <p className="text-sm text-muted-foreground sm:col-span-2">
+              {company.description}
+            </p>
+          )}
+          {company.industry && (
+            <p className="text-xs text-muted-foreground">
+              {t("industry")}: <span className="text-foreground">{company.industry}</span>
+            </p>
+          )}
+          {company.founded_date && (
+            <p className="text-xs text-muted-foreground">
+              {t("foundedDate")}: <span className="text-foreground">{company.founded_date}</span>
+            </p>
+          )}
+          {company.contact_email && (
+            <p className="text-xs text-muted-foreground">
+              {t("contactEmail")}: <span className="text-foreground">{company.contact_email}</span>
+            </p>
+          )}
+          {company.contact_phone && (
+            <p className="text-xs text-muted-foreground">
+              {t("contactPhone")}: <span className="text-foreground">{company.contact_phone}</span>
+            </p>
+          )}
+        </section>
+      )}
 
       <section>
         <div className="mb-3 flex items-center justify-between">
@@ -75,6 +116,13 @@ export default async function CompanyPage({
                 {t(m.role === "owner" ? "owner" : "member")} ·{" "}
                 {t(`status_${m.status}` as "status_invited")}
               </span>
+              {isOwner && m.status !== "removed" ? (
+                <MemberPositionSelect memberId={m.id} position={m.position} />
+              ) : (
+                <span className="text-xs text-muted-foreground">
+                  {t(`position_${m.position}` as "position_member")}
+                </span>
+              )}
               {isOwner && m.role !== "owner" && m.status !== "removed" && (
                 <RemoveMemberButton memberId={m.id} label={t("remove")} />
               )}

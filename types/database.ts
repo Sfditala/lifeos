@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -79,23 +79,38 @@ export type Database = {
       }
       companies: {
         Row: {
+          contact_email: string | null
+          contact_phone: string | null
           created_at: string | null
           deleted_at: string | null
+          description: string | null
+          founded_date: string | null
           id: string
+          industry: string | null
           name: string
           owner_user_id: string
         }
         Insert: {
+          contact_email?: string | null
+          contact_phone?: string | null
           created_at?: string | null
           deleted_at?: string | null
+          description?: string | null
+          founded_date?: string | null
           id?: string
+          industry?: string | null
           name: string
           owner_user_id: string
         }
         Update: {
+          contact_email?: string | null
+          contact_phone?: string | null
           created_at?: string | null
           deleted_at?: string | null
+          description?: string | null
+          founded_date?: string | null
           id?: string
+          industry?: string | null
           name?: string
           owner_user_id?: string
         }
@@ -367,6 +382,10 @@ export type Database = {
           description: string | null
           id: string
           life_area_id: string | null
+          parent_goal_id: string | null
+          period_end: string | null
+          period_start: string | null
+          period_type: string
           status: string
           target_date: string | null
           title: string
@@ -378,6 +397,10 @@ export type Database = {
           description?: string | null
           id?: string
           life_area_id?: string | null
+          parent_goal_id?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          period_type?: string
           status?: string
           target_date?: string | null
           title: string
@@ -389,6 +412,10 @@ export type Database = {
           description?: string | null
           id?: string
           life_area_id?: string | null
+          parent_goal_id?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          period_type?: string
           status?: string
           target_date?: string | null
           title?: string
@@ -400,6 +427,13 @@ export type Database = {
             columns: ["life_area_id"]
             isOneToOne: false
             referencedRelation: "life_areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goals_parent_goal_id_fkey"
+            columns: ["parent_goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
             referencedColumns: ["id"]
           },
         ]
@@ -818,6 +852,7 @@ export type Database = {
       }
       tasks: {
         Row: {
+          assigned_to: string | null
           completed_at: string | null
           created_at: string | null
           deleted_at: string | null
@@ -832,6 +867,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          assigned_to?: string | null
           completed_at?: string | null
           created_at?: string | null
           deleted_at?: string | null
@@ -846,6 +882,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          assigned_to?: string | null
           completed_at?: string | null
           created_at?: string | null
           deleted_at?: string | null
@@ -883,6 +920,7 @@ export type Database = {
           id: string
           invited_at: string | null
           joined_at: string | null
+          position: string
           role: string
           status: string
           user_id: string | null
@@ -893,6 +931,7 @@ export type Database = {
           id?: string
           invited_at?: string | null
           joined_at?: string | null
+          position?: string
           role?: string
           status?: string
           user_id?: string | null
@@ -903,6 +942,7 @@ export type Database = {
           id?: string
           invited_at?: string | null
           joined_at?: string | null
+          position?: string
           role?: string
           status?: string
           user_id?: string | null
@@ -995,7 +1035,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_active_company_member: {
+        Args: { target_company_id: string; target_user_id: string }
+        Returns: boolean
+      }
+      is_company_owner: {
+        Args: { target_company_id: string; target_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
