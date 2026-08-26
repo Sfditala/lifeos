@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.15"
+    PostgrestVersion: "14.17"
   }
   graphql_public: {
     Tables: {
@@ -857,6 +857,7 @@ export type Database = {
           created_at: string | null
           deleted_at: string | null
           due_date: string | null
+          duration_minutes: number | null
           id: string
           life_area_id: string
           notes: string | null
@@ -872,6 +873,7 @@ export type Database = {
           created_at?: string | null
           deleted_at?: string | null
           due_date?: string | null
+          duration_minutes?: number | null
           id?: string
           life_area_id: string
           notes?: string | null
@@ -887,6 +889,7 @@ export type Database = {
           created_at?: string | null
           deleted_at?: string | null
           due_date?: string | null
+          duration_minutes?: number | null
           id?: string
           life_area_id?: string
           notes?: string | null
@@ -972,6 +975,7 @@ export type Database = {
           occurred_at: string
           project_id: string | null
           recurrence_rule: string | null
+          source: string | null
           user_id: string
         }
         Insert: {
@@ -988,6 +992,7 @@ export type Database = {
           occurred_at: string
           project_id?: string | null
           recurrence_rule?: string | null
+          source?: string | null
           user_id: string
         }
         Update: {
@@ -1004,6 +1009,7 @@ export type Database = {
           occurred_at?: string
           project_id?: string | null
           recurrence_rule?: string | null
+          source?: string | null
           user_id?: string
         }
         Relationships: [

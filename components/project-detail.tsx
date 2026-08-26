@@ -15,6 +15,7 @@ import { FilesList } from "@/components/files-list";
 import { DonutChart } from "@/components/charts/donut-chart";
 import { LinkedItems } from "@/components/linked-items";
 import { ProjectChat } from "@/components/project-chat";
+import { formatDurationMinutes } from "@/lib/format-duration";
 import {
   deleteProject,
   deleteMilestone,
@@ -60,6 +61,7 @@ type Task = {
   priority: string;
   due_date: string | null;
   assigned_to: string | null;
+  duration_minutes: number | null;
 };
 type Goal = { id: string; title: string };
 type Assignee = { id: string; email: string };
@@ -95,6 +97,10 @@ export function ProjectDetail({
   const tCommon = useTranslations("common");
   const tStatus = useTranslations("status");
   const router = useRouter();
+  const durationLabels = {
+    hour: tCommon("hourShort"),
+    minute: tCommon("minuteShort"),
+  };
 
   const projectForTaskDialog = [{ id: project.id, name: project.name }];
   const emailByAssigneeId = new Map(assignees.map((a) => [a.id, a.email]));
@@ -244,6 +250,11 @@ export function ProjectDetail({
                 {task.assigned_to && emailByAssigneeId.get(task.assigned_to) && (
                   <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                     {emailByAssigneeId.get(task.assigned_to)}
+                  </span>
+                )}
+                {task.duration_minutes != null && (
+                  <span className="text-xs text-muted-foreground">
+                    {formatDurationMinutes(task.duration_minutes, durationLabels)}
                   </span>
                 )}
                 {task.due_date && (

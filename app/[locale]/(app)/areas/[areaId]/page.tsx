@@ -49,7 +49,7 @@ export default async function AreaPage({
       .order("created_at", { ascending: false }),
     supabase
       .from("tasks")
-      .select("id, title, status, priority, due_date, project_id")
+      .select("id, title, status, priority, due_date, project_id, duration_minutes")
       .eq("life_area_id", areaId)
       .is("deleted_at", null)
       .order("created_at", { ascending: false }),

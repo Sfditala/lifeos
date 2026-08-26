@@ -309,6 +309,8 @@ export async function createTask(formData: FormData) {
   const dueDate = str(formData, "due_date");
   const priority = str(formData, "priority") ?? "medium";
   const assignedTo = str(formData, "assigned_to");
+  const durationRaw = str(formData, "duration_minutes");
+  const durationMinutes = durationRaw ? Number(durationRaw) : null;
   if (!lifeAreaId || !title) throw new Error("Missing fields");
 
   const { error } = await supabase.from("tasks").insert({
@@ -319,6 +321,7 @@ export async function createTask(formData: FormData) {
     due_date: dueDate,
     priority,
     assigned_to: assignedTo,
+    duration_minutes: durationMinutes,
   });
   if (error) throw error;
 
@@ -354,6 +357,7 @@ export async function updateTask(taskId: string, formData: FormData) {
   const dueDate = str(formData, "due_date");
   const priority = str(formData, "priority") ?? "medium";
   const projectId = str(formData, "project_id");
+  const durationRaw = str(formData, "duration_minutes");
   if (!title) throw new Error("Title is required");
 
   const updates: Record<string, unknown> = {
@@ -361,6 +365,7 @@ export async function updateTask(taskId: string, formData: FormData) {
     due_date: dueDate,
     priority,
     project_id: projectId,
+    duration_minutes: durationRaw ? Number(durationRaw) : null,
   };
   // Only touch assigned_to when the form actually carries the field — the
   // area-level task editor doesn't show an assignee picker, and re-saving
@@ -966,6 +971,7 @@ export async function createTransaction(formData: FormData) {
   const amount = Number(str(formData, "amount") ?? "0");
   const direction = str(formData, "direction") ?? "out";
   const category = str(formData, "category");
+  const source = str(formData, "source");
   const occurredAt = str(formData, "occurred_at");
   const note = str(formData, "note");
   const lifeAreaId = str(formData, "life_area_id");
@@ -980,6 +986,7 @@ export async function createTransaction(formData: FormData) {
     amount: Math.abs(amount),
     direction,
     category,
+    source: direction === "in" ? source : null,
     occurred_at: occurredAt,
     note,
     is_recurring: isRecurring,

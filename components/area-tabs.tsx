@@ -21,6 +21,7 @@ import { FilesList } from "@/components/files-list";
 import { MeetingsList } from "@/components/meetings-list";
 import { DonutChart } from "@/components/charts/donut-chart";
 import { HorizontalBarChart } from "@/components/charts/horizontal-bar-chart";
+import { formatDurationMinutes } from "@/lib/format-duration";
 import { deleteGoal, deleteProject, deleteTask, deleteNote } from "@/lib/actions";
 
 type Document = {
@@ -59,6 +60,7 @@ type Task = {
   priority: string;
   due_date: string | null;
   project_id: string | null;
+  duration_minutes: number | null;
 };
 type Note = { id: string; title: string; body: string };
 
@@ -302,6 +304,14 @@ export function AreaTabs({
                 <span className="flex-1 text-sm text-foreground">
                   {task.title}
                 </span>
+                {task.duration_minutes != null && (
+                  <span className="text-xs text-muted-foreground">
+                    {formatDurationMinutes(task.duration_minutes, {
+                      hour: tCommon("hourShort"),
+                      minute: tCommon("minuteShort"),
+                    })}
+                  </span>
+                )}
                 {task.due_date && (
                   <span className="text-xs text-muted-foreground">
                     {task.due_date}

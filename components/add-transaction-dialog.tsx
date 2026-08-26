@@ -4,6 +4,7 @@ import { useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { Plus } from "lucide-react";
 import { createTransaction } from "@/lib/actions";
+import { INCOME_SOURCES } from "@/lib/income-sources";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +33,7 @@ export function AddTransactionDialog({
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
+  const [direction, setDirection] = useState("out");
   const formRef = useRef<HTMLFormElement>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -44,6 +46,7 @@ export function AddTransactionDialog({
     setOpen(false);
     formRef.current.reset();
     setIsRecurring(false);
+    setDirection("out");
   }
 
   if (accounts.length === 0) return null;
@@ -80,7 +83,8 @@ export function AddTransactionDialog({
               <select
                 id="direction"
                 name="direction"
-                defaultValue="out"
+                value={direction}
+                onChange={(e) => setDirection(e.target.value)}
                 className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
               >
                 <option value="out">{t("expense")}</option>
@@ -111,10 +115,28 @@ export function AddTransactionDialog({
               />
             </div>
           </div>
-          <div className="space-y-1">
-            <Label htmlFor="category">{t("category")}</Label>
-            <Input id="category" name="category" />
-          </div>
+          {direction === "in" ? (
+            <div className="space-y-1">
+              <Label htmlFor="source">{t("source")}</Label>
+              <select
+                id="source"
+                name="source"
+                defaultValue="salary"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+              >
+                {INCOME_SOURCES.map((s) => (
+                  <option key={s} value={s}>
+                    {t(`source_${s}`)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              <Label htmlFor="category">{t("category")}</Label>
+              <Input id="category" name="category" />
+            </div>
+          )}
           {areas.length > 0 && (
             <div className="space-y-1">
               <Label htmlFor="life_area_id">{tCommon("lifeArea")}</Label>

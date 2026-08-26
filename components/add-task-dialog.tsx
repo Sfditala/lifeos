@@ -25,6 +25,7 @@ type Initial = {
   priority: string;
   project_id: string | null;
   assigned_to?: string | null;
+  duration_minutes?: number | null;
 };
 
 export function AddTaskDialog({
@@ -117,6 +118,17 @@ export function AddTaskDialog({
                 <option value="high">{tPriority("high")}</option>
               </select>
             </div>
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="duration_minutes">{t("durationMinutes")}</Label>
+            <Input
+              id="duration_minutes"
+              name="duration_minutes"
+              type="number"
+              min="0"
+              step="5"
+              defaultValue={initial?.duration_minutes ?? undefined}
+            />
           </div>
           {projects.length > 0 && (
             <div className="space-y-1">

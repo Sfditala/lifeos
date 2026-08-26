@@ -37,7 +37,7 @@ export default async function ProjectPage({
         .order("due_date", { ascending: true, nullsFirst: false }),
       supabase
         .from("tasks")
-        .select("id, title, status, priority, due_date, assigned_to")
+        .select("id, title, status, priority, due_date, assigned_to, duration_minutes")
         .eq("project_id", projectId)
         .is("deleted_at", null)
         .order("created_at", { ascending: false }),
