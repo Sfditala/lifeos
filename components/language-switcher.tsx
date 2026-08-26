@@ -1,6 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
+import { Languages } from "lucide-react";
 import { Link, usePathname } from "@/i18n/navigation";
 
 export function LanguageSwitcher() {
@@ -13,9 +14,11 @@ export function LanguageSwitcher() {
     <Link
       href={pathname}
       locale={nextLocale}
-      className="text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+      aria-label={t("language")}
+      title={t("language")}
+      className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:text-foreground"
     >
-      {t("language")}
+      <Languages className="h-4 w-4" />
     </Link>
   );
 }

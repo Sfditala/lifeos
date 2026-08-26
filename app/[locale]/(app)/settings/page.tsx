@@ -1,9 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { SettingsForm } from "@/components/settings-form";
-import { AddLifeAreaDialog } from "@/components/add-life-area-dialog";
-import { RowMenu } from "@/components/row-menu";
-import { deleteLifeArea } from "@/lib/actions";
+import { SettingsLifeAreas } from "@/components/settings-life-areas";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -38,7 +36,6 @@ export default async function SettingsPage() {
   }
 
   const t = await getTranslations("settings");
-  const tCommon = await getTranslations("common");
 
   return (
     <div className="flex flex-1 flex-col gap-8 p-4 sm:p-6">
@@ -51,56 +48,13 @@ export default async function SettingsPage() {
         />
       </section>
 
-      <section className="flex max-w-lg flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-foreground">
-            {t("lifeAreas")}
-          </h2>
-          <AddLifeAreaDialog />
-        </div>
-        <ul className="divide-y divide-border rounded-xl border border-border bg-card shadow-sm">
-          {(areas ?? []).map((area) => {
-            const projectCount = projectCounts.get(area.id) ?? 0;
-            const taskCount = taskCounts.get(area.id) ?? 0;
-            return (
-              <li
-                key={area.id}
-                className="flex items-center gap-3 px-4 py-3"
-              >
-                <span
-                  className="h-2.5 w-2.5 shrink-0 rounded-full"
-                  style={{ backgroundColor: area.color ?? "var(--muted-foreground)" }}
-                />
-                <span className="flex-1 truncate text-sm text-foreground">
-                  {area.name}
-                </span>
-                <RowMenu
-                  deleteTitle={tCommon("confirmDeleteTitle")}
-                  deleteImpact={
-                    projectCount > 0 || taskCount > 0
-                      ? tCommon("deleteAreaImpact", {
-                          projects: projectCount,
-                          tasks: taskCount,
-                        })
-                      : tCommon("deleteSimpleImpact")
-                  }
-                  onDelete={() => deleteLifeArea(area.id)}
-                  renderEdit={(open, onOpenChange) => (
-                    <AddLifeAreaDialog
-                      initial={area}
-                      open={open}
-                      onOpenChange={onOpenChange}
-                    />
-                  )}
-                />
-              </li>
-            );
-          })}
-        </ul>
-        {(areas ?? []).length === 0 && (
-          <p className="text-sm text-muted-foreground">{t("emptyLifeAreas")}</p>
-        )}
-      </section>
+      <SettingsLifeAreas
+        areas={(areas ?? []).map((area) => ({
+          ...area,
+          projectCount: projectCounts.get(area.id) ?? 0,
+          taskCount: taskCounts.get(area.id) ?? 0,
+        }))}
+      />
     </div>
   );
 }

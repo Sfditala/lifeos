@@ -132,6 +132,7 @@ export default async function AppLayout({
             </Link>
             <LanguageSwitcher />
             <ThemeToggle />
+            <div className="mx-1 h-5 w-px bg-border" aria-hidden />
             <LogoutButton />
           </div>
         </header>

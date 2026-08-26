@@ -165,102 +165,106 @@ export default async function HomePage() {
         </section>
       )}
 
-      <QuickAddTask areas={areas ?? []} />
+      <div className="flex flex-col gap-6 border-t border-border pt-8">
+        <QuickAddTask areas={areas ?? []} />
 
-      {dueRecurring.length > 0 && (
-        <section>
-          <h2 className="mb-3 text-sm font-semibold text-foreground">
-            {tFinance("recurringDue")}
-          </h2>
-          <ul className="flex flex-wrap gap-2">
-            {dueRecurring.map((tx) => (
-              <li key={tx.id}>
-                <Badge variant="outline">
-                  {tx.label} · {numberFormatter.format(tx.amount)} {tx.currency} ·{" "}
-                  {tx.dueDate}
-                </Badge>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {overdueTasks && overdueTasks.length > 0 && (
-        <section>
-          <h2 className="mb-3 text-sm font-semibold text-destructive">
-            {t("overdue")}
-          </h2>
-          <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
-            {overdueTasks.map((task) => (
-              <li
-                key={task.id}
-                className="flex items-center gap-3 px-4 py-3"
-              >
-                <TaskCheckbox taskId={task.id} done={task.status === "done"} />
-                <span className="flex-1 text-sm text-foreground">
-                  {task.title}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {task.due_date}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      <section>
-        <h2 className="mb-3 text-sm font-semibold text-foreground">
-          {t("today")}
-        </h2>
-        {todayTasks && todayTasks.length > 0 ? (
-          <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
-            {todayTasks.map((task) => (
-              <li
-                key={task.id}
-                className="flex items-center gap-3 px-4 py-3"
-              >
-                <TaskCheckbox taskId={task.id} done={task.status === "done"} />
-                <span className="flex-1 text-sm text-foreground">
-                  {task.title}
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-muted-foreground">{t("noTasksToday")}</p>
+        {dueRecurring.length > 0 && (
+          <section>
+            <h2 className="mb-3 text-sm font-semibold text-foreground">
+              {tFinance("recurringDue")}
+            </h2>
+            <ul className="flex flex-wrap gap-2">
+              {dueRecurring.map((tx) => (
+                <li key={tx.id}>
+                  <Badge variant="outline">
+                    {tx.label} · {numberFormatter.format(tx.amount)} {tx.currency} ·{" "}
+                    {tx.dueDate}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
-      </section>
 
-      <section>
-        <h2 className="mb-3 text-sm font-semibold text-foreground">
-          {tMeetings("upcoming")}
-        </h2>
-        {upcomingMeetings && upcomingMeetings.length > 0 ? (
-          <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
-            {upcomingMeetings.map((meeting) => (
-              <li
-                key={meeting.id}
-                className="flex items-center justify-between px-4 py-3"
-              >
-                <span className="text-sm text-foreground">
-                  {meeting.title}
-                  {meeting.location && (
-                    <span className="text-muted-foreground"> · {meeting.location}</span>
-                  )}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {meetingTimeFormatter.format(new Date(meeting.starts_at))}
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            {tMeetings("noUpcoming")}
-          </p>
-        )}
-      </section>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <section>
+            <h2 className="mb-3 text-sm font-semibold text-foreground">
+              {t("today")}
+            </h2>
+            {todayTasks && todayTasks.length > 0 ? (
+              <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
+                {todayTasks.map((task) => (
+                  <li
+                    key={task.id}
+                    className="flex items-center gap-3 px-4 py-3"
+                  >
+                    <TaskCheckbox taskId={task.id} done={task.status === "done"} />
+                    <span className="flex-1 text-sm text-foreground">
+                      {task.title}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">{t("noTasksToday")}</p>
+            )}
+          </section>
+
+          {overdueTasks && overdueTasks.length > 0 && (
+            <section>
+              <h2 className="mb-3 text-sm font-semibold text-destructive">
+                {t("overdue")}
+              </h2>
+              <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
+                {overdueTasks.map((task) => (
+                  <li
+                    key={task.id}
+                    className="flex items-center gap-3 px-4 py-3"
+                  >
+                    <TaskCheckbox taskId={task.id} done={task.status === "done"} />
+                    <span className="flex-1 text-sm text-foreground">
+                      {task.title}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {task.due_date}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <section>
+            <h2 className="mb-3 text-sm font-semibold text-foreground">
+              {tMeetings("upcoming")}
+            </h2>
+            {upcomingMeetings && upcomingMeetings.length > 0 ? (
+              <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
+                {upcomingMeetings.map((meeting) => (
+                  <li
+                    key={meeting.id}
+                    className="flex items-center justify-between px-4 py-3"
+                  >
+                    <span className="text-sm text-foreground">
+                      {meeting.title}
+                      {meeting.location && (
+                        <span className="text-muted-foreground"> · {meeting.location}</span>
+                      )}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {meetingTimeFormatter.format(new Date(meeting.starts_at))}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                {tMeetings("noUpcoming")}
+              </p>
+            )}
+          </section>
+        </div>
+      </div>
     </div>
   );
 }
