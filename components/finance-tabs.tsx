@@ -9,6 +9,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { EmptyState } from "@/components/empty-state";
+import { ProgressBar } from "@/components/progress-bar";
 import { RowMenu } from "@/components/row-menu";
 import { Button } from "@/components/ui/button";
 import { AddAccountDialog } from "@/components/add-account-dialog";
@@ -208,11 +209,8 @@ export function FinanceTabs({
                     {t("spentThisMonth")}: {numberFormatter.format(b.spent)} /{" "}
                     {numberFormatter.format(b.monthly_limit)}
                   </p>
-                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className={`h-full rounded-full ${over ? "bg-destructive" : "bg-primary"}`}
-                      style={{ width: `${percent}%` }}
-                    />
+                  <div className="mt-2">
+                    <ProgressBar percent={percent} tone={over ? "warn" : "default"} />
                   </div>
                 </li>
               );
@@ -264,11 +262,8 @@ export function FinanceTabs({
                     {numberFormatter.format(g.current_amount)} /{" "}
                     {numberFormatter.format(g.target_amount)} ({percent}%)
                   </p>
-                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full bg-primary"
-                      style={{ width: `${percent}%` }}
-                    />
+                  <div className="mt-2">
+                    <ProgressBar percent={percent} />
                   </div>
                 </li>
               );

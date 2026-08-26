@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient as createSupabaseJsClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { type GoalPeriodType, parentTierFor, descendantIds } from "@/lib/goals";
 
 function createAdminClient() {
   return createSupabaseJsClient(
@@ -103,13 +104,33 @@ export async function createGoal(formData: FormData) {
   const lifeAreaId = str(formData, "life_area_id");
   const title = str(formData, "title");
   const targetDate = str(formData, "target_date");
-  if (!lifeAreaId || !title) throw new Error("Missing fields");
+  const periodType = (str(formData, "period_type") ??
+    "yearly") as GoalPeriodType;
+  const parentGoalId = str(formData, "parent_goal_id");
+  const periodStart = str(formData, "period_start");
+  const periodEnd = str(formData, "period_end");
+  if (!title) throw new Error("Missing fields");
+
+  if (parentGoalId) {
+    const { data: parent } = await supabase
+      .from("goals")
+      .select("period_type")
+      .eq("id", parentGoalId)
+      .single();
+    if (!parent || parent.period_type !== parentTierFor(periodType)) {
+      throw new Error("Invalid parent goal for this period type");
+    }
+  }
 
   const { error } = await supabase.from("goals").insert({
     user_id: userId,
     life_area_id: lifeAreaId,
     title,
     target_date: targetDate,
+    period_type: periodType,
+    parent_goal_id: parentGoalId,
+    period_start: periodStart,
+    period_end: periodEnd,
   });
   if (error) throw error;
 
@@ -130,11 +151,42 @@ export async function updateGoal(goalId: string, formData: FormData) {
   const { supabase } = await requireUserId();
   const title = str(formData, "title");
   const targetDate = str(formData, "target_date");
+  const lifeAreaId = str(formData, "life_area_id");
+  const parentGoalId = str(formData, "parent_goal_id");
+  const periodStart = str(formData, "period_start");
+  const periodEnd = str(formData, "period_end");
   if (!title) throw new Error("Title is required");
+
+  if (parentGoalId) {
+    const { data: current } = await supabase
+      .from("goals")
+      .select("period_type")
+      .eq("id", goalId)
+      .single();
+    const { data: parent } = await supabase
+      .from("goals")
+      .select("period_type")
+      .eq("id", parentGoalId)
+      .single();
+    if (
+      !current ||
+      !parent ||
+      parent.period_type !== parentTierFor(current.period_type as GoalPeriodType)
+    ) {
+      throw new Error("Invalid parent goal for this period type");
+    }
+  }
 
   const { error } = await supabase
     .from("goals")
-    .update({ title, target_date: targetDate })
+    .update({
+      title,
+      target_date: targetDate,
+      life_area_id: lifeAreaId,
+      parent_goal_id: parentGoalId,
+      period_start: periodStart,
+      period_end: periodEnd,
+    })
     .eq("id", goalId);
   if (error) throw error;
 
@@ -142,11 +194,20 @@ export async function updateGoal(goalId: string, formData: FormData) {
 }
 
 export async function deleteGoal(goalId: string) {
-  const { supabase } = await requireUserId();
+  const { supabase, userId } = await requireUserId();
+  const { data: allGoals } = await supabase
+    .from("goals")
+    .select("id, parent_goal_id")
+    .is("deleted_at", null)
+    .eq("user_id", userId);
+
+  const ids = new Set(descendantIds(goalId, allGoals ?? []));
+  ids.add(goalId);
+
   const { error } = await supabase
     .from("goals")
     .update({ deleted_at: new Date().toISOString() })
-    .eq("id", goalId);
+    .in("id", Array.from(ids));
   if (error) throw error;
   revalidatePath("/", "layout");
 }

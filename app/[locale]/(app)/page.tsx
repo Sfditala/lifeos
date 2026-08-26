@@ -2,7 +2,9 @@ import { getTranslations, getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { TaskCheckbox } from "@/components/task-checkbox";
 import { QuickAddTask } from "@/components/quick-add-task";
+import { GoalsDashboard } from "@/components/goals-dashboard";
 import { Badge } from "@/components/ui/badge";
+import { computeGoalProgress } from "@/lib/goals";
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -18,7 +20,8 @@ export default async function HomePage() {
   const [
     { data: todayTasks },
     { data: overdueTasks },
-    { data: upcomingGoals },
+    { data: goals },
+    { data: allTasks },
     { data: areas },
     { data: upcomingMeetings },
   ] = await Promise.all([
@@ -38,12 +41,15 @@ export default async function HomePage() {
       .order("due_date", { ascending: true }),
     supabase
       .from("goals")
-      .select("id, title, target_date")
+      .select(
+        "id, title, status, target_date, period_type, parent_goal_id, life_area_id, period_start, period_end",
+      )
       .is("deleted_at", null)
-      .eq("status", "active")
-      .gte("target_date", today)
-      .order("target_date", { ascending: true })
-      .limit(3),
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("tasks")
+      .select("life_area_id, status")
+      .is("deleted_at", null),
     supabase
       .from("life_areas")
       .select("id, name")
@@ -57,6 +63,9 @@ export default async function HomePage() {
       .lte("starts_at", in72h)
       .order("starts_at", { ascending: true }),
   ]);
+
+  const progressMap = computeGoalProgress(goals ?? [], allTasks ?? []);
+  const progress = Object.fromEntries(progressMap);
 
   const { data: recurringTx } = await supabase
     .from("transactions")
@@ -110,6 +119,12 @@ export default async function HomePage() {
           {t("welcome")}
         </h1>
       </div>
+
+      <GoalsDashboard
+        goals={goals ?? []}
+        progress={progress}
+        lifeAreas={areas ?? []}
+      />
 
       <QuickAddTask areas={areas ?? []} />
 
@@ -175,29 +190,6 @@ export default async function HomePage() {
           </ul>
         ) : (
           <p className="text-sm text-muted-foreground">{t("noTasksToday")}</p>
-        )}
-      </section>
-
-      <section>
-        <h2 className="mb-3 text-sm font-semibold text-foreground">
-          {t("upcoming")}
-        </h2>
-        {upcomingGoals && upcomingGoals.length > 0 ? (
-          <ul className="divide-y divide-border rounded-lg border border-border">
-            {upcomingGoals.map((goal) => (
-              <li
-                key={goal.id}
-                className="flex items-center justify-between px-4 py-3"
-              >
-                <span className="text-sm text-foreground">{goal.title}</span>
-                <span className="text-xs text-muted-foreground">
-                  {goal.target_date}
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-muted-foreground">{t("noUpcoming")}</p>
         )}
       </section>
 

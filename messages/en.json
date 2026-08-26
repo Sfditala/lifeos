@@ -52,6 +52,7 @@
     "confirmDeleteTitle": "Delete this?",
     "deleteAreaImpact": "{projects} project(s) and {tasks} task(s) in this area will move to trash with it. You can restore within 30 days.",
     "deleteProjectImpact": "{tasks} task(s) and {milestones} milestone(s) in this project will move to trash with it. You can restore within 30 days.",
+    "deleteGoalImpact": "{count} sub-goal(s) will move to trash with it. You can restore within 30 days.",
     "deleteSimpleImpact": "It will move to trash — you can restore it within 30 days.",
     "trash": "Trash"
   },
@@ -125,6 +126,21 @@
     "noOverdue": "No overdue tasks",
     "noUpcoming": "No upcoming dates",
     "quickAddPlaceholder": "Add a quick task..."
+  },
+  "goalHierarchy": {
+    "big": "Big Goal",
+    "yearly": "This Year's Goals",
+    "monthly": "This Month's Goals",
+    "weekly": "This Week's Goals",
+    "emptyBig": "No big goal yet",
+    "emptyYearly": "No yearly goals yet",
+    "emptyMonthly": "No monthly goals yet",
+    "emptyWeekly": "No goals for this week yet",
+    "periodType": "Goal type",
+    "parentGoal": "Parent goal",
+    "periodStart": "Week start",
+    "periodEnd": "Week end",
+    "startWeeklyReview": "Start weekly review"
   },
   "habits": {
     "title": "Habits",
