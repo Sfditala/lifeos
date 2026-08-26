@@ -7,6 +7,7 @@ import { deleteGoal } from "@/lib/actions";
 import { countDescendants, type GoalPeriodType } from "@/lib/goals";
 import { AddGoalDialog } from "@/components/add-goal-dialog";
 import { EmptyState } from "@/components/empty-state";
+import { HorizontalBarChart } from "@/components/charts/horizontal-bar-chart";
 import { ProgressBar } from "@/components/progress-bar";
 import { RowMenu } from "@/components/row-menu";
 import { StatusBadge } from "@/components/status-badge";
@@ -153,8 +154,25 @@ export function GoalsDashboard({
       (!g.period_end || g.period_end >= today),
   );
 
+  const overviewChartData = [...big, ...yearly].map((g) => ({
+    name: g.title,
+    value: g.progress,
+    color: "var(--primary)",
+  }));
+
   return (
     <div className="flex flex-col gap-8">
+      {overviewChartData.length > 0 && (
+        <section>
+          <h2 className="mb-3 text-sm font-semibold text-foreground">
+            {t("progressOverview")}
+          </h2>
+          <div className="rounded-lg border border-border bg-card p-4">
+            <HorizontalBarChart data={overviewChartData} />
+          </div>
+        </section>
+      )}
+
       <GoalTierSection
         periodType="big"
         title={t("big")}

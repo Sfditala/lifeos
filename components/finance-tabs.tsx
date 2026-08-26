@@ -10,6 +10,9 @@ import {
 } from "@/components/ui/tabs";
 import { EmptyState } from "@/components/empty-state";
 import { ProgressBar } from "@/components/progress-bar";
+import { DonutChart } from "@/components/charts/donut-chart";
+import { MonthlyFlowChart } from "@/components/charts/monthly-flow-chart";
+import { LIFE_AREA_PALETTE } from "@/lib/palette";
 import { RowMenu } from "@/components/row-menu";
 import { Button } from "@/components/ui/button";
 import { AddAccountDialog } from "@/components/add-account-dialog";
@@ -75,14 +78,71 @@ export function FinanceTabs({
     locale === "ar" ? "ar-u-nu-latn" : "en",
   );
 
+  const expenseByCategory = new Map<string, number>();
+  for (const tx of transactions) {
+    if (tx.direction !== "out") continue;
+    const key = tx.category || tCommon("none");
+    expenseByCategory.set(key, (expenseByCategory.get(key) ?? 0) + tx.amount);
+  }
+  const categoryChartData = Array.from(expenseByCategory.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, value], i) => ({
+      name,
+      value,
+      color: LIFE_AREA_PALETTE[i % LIFE_AREA_PALETTE.length],
+    }));
+
+  const monthlyMap = new Map<string, { income: number; expense: number }>();
+  for (const tx of transactions) {
+    const month = tx.occurred_at.slice(0, 7);
+    const entry = monthlyMap.get(month) ?? { income: 0, expense: 0 };
+    if (tx.direction === "in") entry.income += tx.amount;
+    else entry.expense += tx.amount;
+    monthlyMap.set(month, entry);
+  }
+  const monthlyChartData = Array.from(monthlyMap.entries())
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .slice(-6)
+    .map(([month, v]) => ({ month, income: v.income, expense: v.expense }));
+
   return (
-    <Tabs defaultValue="accounts">
+    <Tabs defaultValue="overview">
       <TabsList variant="line" className="mb-6 w-full justify-start overflow-x-auto">
+        <TabsTrigger value="overview">{t("overview")}</TabsTrigger>
         <TabsTrigger value="accounts">{t("accounts")}</TabsTrigger>
         <TabsTrigger value="transactions">{t("transactions")}</TabsTrigger>
         <TabsTrigger value="budgets">{t("budgets")}</TabsTrigger>
         <TabsTrigger value="goals">{t("financialGoals")}</TabsTrigger>
       </TabsList>
+
+      <TabsContent value="overview">
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div className="rounded-lg border border-border bg-card p-4">
+            <h3 className="mb-2 text-sm font-semibold text-foreground">
+              {t("expenseByCategory")}
+            </h3>
+            {categoryChartData.length > 0 ? (
+              <DonutChart data={categoryChartData} />
+            ) : (
+              <p className="text-sm text-muted-foreground">{t("emptyTransactions")}</p>
+            )}
+          </div>
+          <div className="rounded-lg border border-border bg-card p-4">
+            <h3 className="mb-2 text-sm font-semibold text-foreground">
+              {t("monthlyFlow")}
+            </h3>
+            {monthlyChartData.length > 0 ? (
+              <MonthlyFlowChart
+                data={monthlyChartData}
+                incomeLabel={t("income")}
+                expenseLabel={t("expense")}
+              />
+            ) : (
+              <p className="text-sm text-muted-foreground">{t("emptyTransactions")}</p>
+            )}
+          </div>
+        </div>
+      </TabsContent>
 
       <TabsContent value="accounts">
         <div className="mb-3 flex justify-end">

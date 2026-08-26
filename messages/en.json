@@ -108,10 +108,13 @@
     "latestNote": "Latest note",
     "emptyNotes": "No notes for this area yet",
     "showMeetingsTab": "Does this area need a Meetings tab?",
-    "showFilesTab": "Does this area need a Files tab?"
+    "showFilesTab": "Does this area need a Files tab?",
+    "taskStatusChart": "Tasks by Status",
+    "projectCompletionChart": "Project Completion"
   },
   "project": {
     "dueDate": "Due date",
+    "taskCompletion": "Task completion",
     "milestones": "Milestones",
     "addMilestone": "Add milestone",
     "newMilestoneTitle": "New milestone",
@@ -128,6 +131,7 @@
     "quickAddPlaceholder": "Add a quick task..."
   },
   "goalHierarchy": {
+    "progressOverview": "Progress Overview",
     "big": "Big Goal",
     "yearly": "This Year's Goals",
     "monthly": "This Month's Goals",
@@ -197,6 +201,9 @@
   },
   "finance": {
     "title": "Finance",
+    "overview": "Overview",
+    "expenseByCategory": "Expenses by Category",
+    "monthlyFlow": "Monthly Income vs Expense",
     "accounts": "Accounts",
     "transactions": "Transactions",
     "budgets": "Budgets",

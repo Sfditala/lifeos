@@ -19,6 +19,8 @@ import { EmptyState } from "@/components/empty-state";
 import { RowMenu } from "@/components/row-menu";
 import { FilesList } from "@/components/files-list";
 import { MeetingsList } from "@/components/meetings-list";
+import { DonutChart } from "@/components/charts/donut-chart";
+import { HorizontalBarChart } from "@/components/charts/horizontal-bar-chart";
 import { deleteGoal, deleteProject, deleteTask, deleteNote } from "@/lib/actions";
 
 type Document = {
@@ -87,6 +89,34 @@ export function AreaTabs({
 }) {
   const t = useTranslations("areas");
   const tCommon = useTranslations("common");
+  const tStatus = useTranslations("status");
+
+  const statusCounts = { todo: 0, doing: 0, done: 0 };
+  for (const task of tasks) {
+    if (task.status in statusCounts) {
+      statusCounts[task.status as keyof typeof statusCounts] += 1;
+    }
+  }
+  const statusChartData = [
+    { name: tStatus("todo"), value: statusCounts.todo, color: "var(--muted-foreground)" },
+    { name: tStatus("doing"), value: statusCounts.doing, color: "#F59E0B" },
+    { name: tStatus("done"), value: statusCounts.done, color: "#10B981" },
+  ];
+
+  const projectTaskStats = new Map<string, { done: number; total: number }>();
+  for (const task of tasks) {
+    if (!task.project_id) continue;
+    const stat = projectTaskStats.get(task.project_id) ?? { done: 0, total: 0 };
+    stat.total += 1;
+    if (task.status === "done") stat.done += 1;
+    projectTaskStats.set(task.project_id, stat);
+  }
+  const projectCompletionData = projects
+    .filter((p) => (projectTaskStats.get(p.id)?.total ?? 0) > 0)
+    .map((p) => {
+      const stat = projectTaskStats.get(p.id)!;
+      return { name: p.name, value: Math.round((stat.done / stat.total) * 100) };
+    });
 
   return (
     <Tabs defaultValue="overview">
@@ -123,6 +153,29 @@ export function AreaTabs({
               {overview.latestNoteTitle ?? "—"}
             </p>
             <p className="text-xs text-muted-foreground">{t("latestNote")}</p>
+          </div>
+        </div>
+
+        <div className="mt-6 grid gap-6 sm:grid-cols-2">
+          <div className="rounded-lg border border-border bg-card p-4">
+            <h3 className="mb-2 text-sm font-semibold text-foreground">
+              {t("taskStatusChart")}
+            </h3>
+            {statusChartData.some((d) => d.value > 0) ? (
+              <DonutChart data={statusChartData} />
+            ) : (
+              <p className="text-sm text-muted-foreground">{t("emptyTasks")}</p>
+            )}
+          </div>
+          <div className="rounded-lg border border-border bg-card p-4">
+            <h3 className="mb-2 text-sm font-semibold text-foreground">
+              {t("projectCompletionChart")}
+            </h3>
+            {projectCompletionData.length > 0 ? (
+              <HorizontalBarChart data={projectCompletionData} />
+            ) : (
+              <p className="text-sm text-muted-foreground">{t("emptyProjects")}</p>
+            )}
           </div>
         </div>
       </TabsContent>

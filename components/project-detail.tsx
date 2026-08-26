@@ -12,6 +12,7 @@ import { AddProjectDialog } from "@/components/add-project-dialog";
 import { EmptyState } from "@/components/empty-state";
 import { RowMenu } from "@/components/row-menu";
 import { FilesList } from "@/components/files-list";
+import { DonutChart } from "@/components/charts/donut-chart";
 import { LinkedItems } from "@/components/linked-items";
 import { ProjectChat } from "@/components/project-chat";
 import {
@@ -88,9 +89,25 @@ export function ProjectDetail({
   const tAreas = useTranslations("areas");
   const tFiles = useTranslations("files");
   const tCommon = useTranslations("common");
+  const tStatus = useTranslations("status");
   const router = useRouter();
 
   const projectForTaskDialog = [{ id: project.id, name: project.name }];
+
+  const statusCounts = { todo: 0, doing: 0, done: 0 };
+  for (const task of tasks) {
+    if (task.status in statusCounts) {
+      statusCounts[task.status as keyof typeof statusCounts] += 1;
+    }
+  }
+  const statusChartData = [
+    { name: tStatus("todo"), value: statusCounts.todo, color: "var(--muted-foreground)" },
+    { name: tStatus("doing"), value: statusCounts.doing, color: "#F59E0B" },
+    { name: tStatus("done"), value: statusCounts.done, color: "#10B981" },
+  ];
+  const totalTasks = tasks.length;
+  const completionPercent =
+    totalTasks > 0 ? Math.round((statusCounts.done / totalTasks) * 100) : 0;
 
   return (
     <div className="flex flex-1 flex-col gap-8 p-4 sm:p-6">
@@ -137,6 +154,17 @@ export function ProjectDetail({
           </p>
         )}
       </div>
+
+      {totalTasks > 0 && (
+        <section>
+          <div className="rounded-lg border border-border bg-card p-4">
+            <h3 className="mb-2 text-sm font-semibold text-foreground">
+              {t("taskCompletion")} ({completionPercent}%)
+            </h3>
+            <DonutChart data={statusChartData} height={180} />
+          </div>
+        </section>
+      )}
 
       <section>
         <div className="mb-3 flex items-center justify-between">

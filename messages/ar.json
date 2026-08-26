@@ -108,10 +108,13 @@
     "latestNote": "آخر ملاحظة",
     "emptyNotes": "لا يوجد ملاحظات لهذا المجال بعد",
     "showMeetingsTab": "يحتاج هذا المجال تبويب اجتماعات؟",
-    "showFilesTab": "يحتاج هذا المجال تبويب ملفات؟"
+    "showFilesTab": "يحتاج هذا المجال تبويب ملفات؟",
+    "taskStatusChart": "توزيع المهام حسب الحالة",
+    "projectCompletionChart": "نسبة إنجاز المشاريع"
   },
   "project": {
     "dueDate": "تاريخ الاستحقاق",
+    "taskCompletion": "نسبة إنجاز المهام",
     "milestones": "معالم رئيسية",
     "addMilestone": "إضافة معلم",
     "newMilestoneTitle": "معلم جديد",
@@ -128,6 +131,7 @@
     "quickAddPlaceholder": "أضف مهمة سريعة..."
   },
   "goalHierarchy": {
+    "progressOverview": "نظرة عامة على التقدم",
     "big": "الهدف الكبير",
     "yearly": "أهداف هذا العام",
     "monthly": "أهداف هذا الشهر",
@@ -197,6 +201,9 @@
   },
   "finance": {
     "title": "المال",
+    "overview": "نظرة عامة",
+    "expenseByCategory": "توزيع المصروفات حسب التصنيف",
+    "monthlyFlow": "الدخل والمصروف الشهري",
     "accounts": "الحسابات",
     "transactions": "الحركات",
     "budgets": "الميزانيات",
