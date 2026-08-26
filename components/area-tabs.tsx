@@ -47,9 +47,11 @@ type Project = {
   status: string;
   due_date: string | null;
   goal_id: string | null;
+  company_id: string | null;
   taskCount: number;
   milestoneCount: number;
 };
+type Company = { id: string; name: string };
 type Task = {
   id: string;
   title: string;
@@ -70,6 +72,7 @@ export function AreaTabs({
   notes,
   documents,
   meetings,
+  companies,
   overview,
 }: {
   areaId: string;
@@ -81,6 +84,7 @@ export function AreaTabs({
   notes: Note[];
   documents: Document[];
   meetings: Meeting[];
+  companies: Company[];
   overview: {
     activeProjects: number;
     overdueTasks: number;
@@ -227,6 +231,7 @@ export function AreaTabs({
           <AddProjectDialog
             lifeAreaId={areaId}
             goals={goals.map((g) => ({ id: g.id, title: g.title }))}
+            companies={companies}
           />
         </div>
         {projects.length > 0 ? (
@@ -256,6 +261,7 @@ export function AreaTabs({
                       <AddProjectDialog
                         lifeAreaId={areaId}
                         goals={goals.map((g) => ({ id: g.id, title: g.title }))}
+                        companies={companies}
                         initial={project}
                         open={open}
                         onOpenChange={onOpenChange}
@@ -274,6 +280,7 @@ export function AreaTabs({
               <AddProjectDialog
                 lifeAreaId={areaId}
                 goals={goals.map((g) => ({ id: g.id, title: g.title }))}
+                companies={companies}
               />
             }
           />

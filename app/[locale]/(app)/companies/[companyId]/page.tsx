@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { EmptyState } from "@/components/empty-state";
 import { InviteMemberDialog } from "@/components/invite-member-dialog";
 import { RemoveMemberButton } from "@/components/remove-member-button";
+import { AddCompanyProjectDialog } from "@/components/add-company-project-dialog";
 import { FolderKanban } from "lucide-react";
 
 export default async function CompanyPage({
@@ -43,6 +44,14 @@ export default async function CompanyPage({
   const t = await getTranslations("team");
   const isOwner = company.owner_user_id === user?.id;
 
+  const { data: lifeAreas } = isOwner
+    ? await supabase
+        .from("life_areas")
+        .select("id, name")
+        .is("deleted_at", null)
+        .order("sort_order", { ascending: true })
+    : { data: null };
+
   return (
     <div className="flex flex-1 flex-col gap-8 p-4 sm:p-6">
       <h1 className="text-2xl font-semibold text-foreground">
@@ -75,9 +84,17 @@ export default async function CompanyPage({
       </section>
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold text-foreground">
-          {t("projects")}
-        </h2>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-foreground">
+            {t("projects")}
+          </h2>
+          {isOwner && (
+            <AddCompanyProjectDialog
+              companyId={companyId}
+              lifeAreas={lifeAreas ?? []}
+            />
+          )}
+        </div>
         {projects && projects.length > 0 ? (
           <ul className="divide-y divide-border rounded-lg border border-border">
             {projects.map((p) => (

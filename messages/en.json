@@ -265,6 +265,8 @@
     "remove": "Remove",
     "projects": "Shared projects",
     "emptyProjects": "No shared projects yet",
+    "projectLifeArea": "Life area",
+    "chooseLifeArea": "Choose a life area",
     "chat": "Chat",
     "sendMessage": "Send a message...",
     "send": "Send",

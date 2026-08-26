@@ -14,6 +14,10 @@ export default async function AreaPage({
   const { areaId } = await params;
   const supabase = await createClient();
   const today = todayIso();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const currentUserId = user?.id ?? "";
 
   const [
     { data: area },
@@ -23,6 +27,7 @@ export default async function AreaPage({
     { data: notes },
     { data: documents },
     { data: meetings },
+    { data: companies },
   ] = await Promise.all([
     supabase
       .from("life_areas")
@@ -38,7 +43,7 @@ export default async function AreaPage({
       .order("created_at", { ascending: false }),
     supabase
       .from("projects")
-      .select("id, name, description, status, due_date, goal_id")
+      .select("id, name, description, status, due_date, goal_id, company_id")
       .eq("life_area_id", areaId)
       .is("deleted_at", null)
       .order("created_at", { ascending: false }),
@@ -66,6 +71,11 @@ export default async function AreaPage({
       .eq("life_area_id", areaId)
       .is("deleted_at", null)
       .order("starts_at", { ascending: true }),
+    supabase
+      .from("companies")
+      .select("id, name")
+      .eq("owner_user_id", currentUserId)
+      .is("deleted_at", null),
   ]);
 
   if (!area) notFound();
@@ -128,6 +138,7 @@ export default async function AreaPage({
         notes={notes ?? []}
         documents={documents ?? []}
         meetings={meetings ?? []}
+        companies={companies ?? []}
         overview={{ activeProjects, overdueTasks, latestNoteTitle }}
       />
     </div>
