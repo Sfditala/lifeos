@@ -140,7 +140,7 @@ export function AreaTabs({
 
       <TabsContent value="overview">
         <div className="grid gap-3 sm:grid-cols-3">
-          <div className="rounded-lg border border-border bg-card p-4">
+          <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
             <p className="text-2xl font-semibold text-foreground">
               {overview.activeProjects}
             </p>
@@ -148,13 +148,13 @@ export function AreaTabs({
               {t("activeProjects")}
             </p>
           </div>
-          <div className="rounded-lg border border-border bg-card p-4">
+          <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
             <p className="text-2xl font-semibold text-destructive">
               {overview.overdueTasks}
             </p>
             <p className="text-xs text-muted-foreground">{t("overdueTasks")}</p>
           </div>
-          <div className="rounded-lg border border-border bg-card p-4">
+          <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
             <p className="truncate text-sm font-medium text-foreground">
               {overview.latestNoteTitle ?? "—"}
             </p>
@@ -163,7 +163,7 @@ export function AreaTabs({
         </div>
 
         <div className="mt-6 grid gap-6 sm:grid-cols-2">
-          <div className="rounded-lg border border-border bg-card p-4">
+          <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
             <h3 className="mb-2 text-sm font-semibold text-foreground">
               {t("taskStatusChart")}
             </h3>
@@ -173,7 +173,7 @@ export function AreaTabs({
               <p className="text-sm text-muted-foreground">{t("emptyTasks")}</p>
             )}
           </div>
-          <div className="rounded-lg border border-border bg-card p-4">
+          <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
             <h3 className="mb-2 text-sm font-semibold text-foreground">
               {t("projectCompletionChart")}
             </h3>
@@ -191,7 +191,7 @@ export function AreaTabs({
           <AddGoalDialog lifeAreaId={areaId} />
         </div>
         {goals.length > 0 ? (
-          <ul className="divide-y divide-border rounded-lg border border-border">
+          <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
             {goals.map((goal) => (
               <li key={goal.id} className="flex items-center gap-3 px-4 py-3">
                 <span className="flex-1 text-sm text-foreground">
@@ -237,7 +237,7 @@ export function AreaTabs({
           />
         </div>
         {projects.length > 0 ? (
-          <ul className="divide-y divide-border rounded-lg border border-border">
+          <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
             {projects.map((project) => (
               <li key={project.id} className="flex items-center">
                 <Link
@@ -297,7 +297,7 @@ export function AreaTabs({
           />
         </div>
         {tasks.length > 0 ? (
-          <ul className="divide-y divide-border rounded-lg border border-border">
+          <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
             {tasks.map((task) => (
               <li key={task.id} className="flex items-center gap-3 px-4 py-3">
                 <TaskCheckbox taskId={task.id} done={task.status === "done"} />
@@ -358,7 +358,7 @@ export function AreaTabs({
             {notes.map((note) => (
               <li
                 key={note.id}
-                className="relative rounded-lg border border-border bg-card p-4"
+                className="relative rounded-lg border border-border bg-card p-4 shadow-sm"
               >
                 <div className="absolute top-2 end-2">
                   <RowMenu

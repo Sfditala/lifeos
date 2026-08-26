@@ -70,7 +70,7 @@ export default async function CompanyPage({
         company.founded_date ||
         company.contact_email ||
         company.contact_phone) && (
-        <section className="grid gap-3 rounded-lg border border-border bg-card p-4 sm:grid-cols-2">
+        <section className="grid gap-3 rounded-lg border border-border bg-card p-4 shadow-sm sm:grid-cols-2">
           {company.description && (
             <p className="text-sm text-muted-foreground sm:col-span-2">
               {company.description}
@@ -106,7 +106,7 @@ export default async function CompanyPage({
           </h2>
           {isOwner && <InviteMemberDialog companyId={companyId} />}
         </div>
-        <ul className="divide-y divide-border rounded-lg border border-border">
+        <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
           {(members ?? []).map((m) => (
             <li key={m.id} className="flex items-center gap-3 px-4 py-3">
               <span className="flex-1 text-sm text-foreground">
@@ -144,7 +144,7 @@ export default async function CompanyPage({
           )}
         </div>
         {projects && projects.length > 0 ? (
-          <ul className="divide-y divide-border rounded-lg border border-border">
+          <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
             {projects.map((p) => (
               <li key={p.id}>
                 <Link

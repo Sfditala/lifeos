@@ -29,7 +29,7 @@ export default async function CompaniesPage() {
       </div>
 
       {companies && companies.length > 0 ? (
-        <ul className="divide-y divide-border rounded-lg border border-border">
+        <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
           {companies.map((company) => (
             <li key={company.id}>
               <Link

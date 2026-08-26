@@ -24,7 +24,8 @@
     "notes": "Notes",
     "reviews": "Reviews",
     "finance": "Finance",
-    "companies": "Teams & Companies"
+    "companies": "Teams & Companies",
+    "settings": "Settings"
   },
   "common": {
     "add": "Add",
@@ -125,6 +126,7 @@
   },
   "home": {
     "welcome": "Welcome",
+    "lifeAreas": "Life areas",
     "today": "Today's tasks",
     "overdue": "Overdue tasks",
     "upcoming": "Upcoming dates",
@@ -345,5 +347,14 @@
     "suggestionGrowth": "Self-Development & Learning",
     "suggestionJob": "Job",
     "suggestionCompany": "Company / Own Business"
+  },
+  "settings": {
+    "title": "Personal Settings",
+    "displayName": "Display name",
+    "displayNamePlaceholder": "Your name",
+    "accentColor": "Personal accent color",
+    "accentDefault": "Default color",
+    "lifeAreas": "Life areas",
+    "emptyLifeAreas": "No life areas yet"
   }
 }

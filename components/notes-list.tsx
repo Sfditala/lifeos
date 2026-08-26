@@ -30,7 +30,7 @@ export function NotesList({ notes, q }: { notes: Note[]; q: string }) {
       {notes.map((note) => (
         <li
           key={note.id}
-          className="relative rounded-lg border border-border bg-card p-4"
+          className="relative rounded-lg border border-border bg-card p-4 shadow-sm"
         >
           <div className="absolute top-2 end-2">
             <RowMenu

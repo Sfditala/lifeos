@@ -1245,6 +1245,24 @@ export async function createProjectMessage(
   revalidatePath("/", "layout");
 }
 
+// --- Personal settings ---
+
+export async function upsertUserSettings(formData: FormData) {
+  const { supabase, userId } = await requireUserId();
+  const displayName = str(formData, "display_name");
+  const accentColor = str(formData, "accent_color");
+
+  const { error } = await supabase.from("user_settings").upsert({
+    user_id: userId,
+    display_name: displayName,
+    accent_color: accentColor,
+    updated_at: new Date().toISOString(),
+  });
+  if (error) throw error;
+
+  revalidatePath("/", "layout");
+}
+
 // --- Onboarding ---
 
 export async function completeOnboarding(formData: FormData) {

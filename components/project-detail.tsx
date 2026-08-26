@@ -128,6 +128,13 @@ export function ProjectDetail({
             {project.name}
           </h1>
           <StatusBadge status={project.status} />
+          {project.company_id && (
+            <ProjectChat
+              projectId={project.id}
+              messages={messages}
+              currentUserId={currentUserId}
+            />
+          )}
           <RowMenu
             deleteTitle={tCommon("confirmDeleteTitle")}
             deleteImpact={
@@ -168,7 +175,7 @@ export function ProjectDetail({
 
       {totalTasks > 0 && (
         <section>
-          <div className="rounded-lg border border-border bg-card p-4">
+          <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
             <h3 className="mb-2 text-sm font-semibold text-foreground">
               {t("taskCompletion")} ({completionPercent}%)
             </h3>
@@ -185,7 +192,7 @@ export function ProjectDetail({
           <AddMilestoneDialog projectId={project.id} />
         </div>
         {milestones.length > 0 ? (
-          <ul className="divide-y divide-border rounded-lg border border-border">
+          <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
             {milestones.map((milestone) => (
               <li
                 key={milestone.id}
@@ -240,7 +247,7 @@ export function ProjectDetail({
           />
         </div>
         {tasks.length > 0 ? (
-          <ul className="divide-y divide-border rounded-lg border border-border">
+          <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
             {tasks.map((task) => (
               <li key={task.id} className="flex items-center gap-3 px-4 py-3">
                 <TaskCheckbox taskId={task.id} done={task.status === "done"} />
@@ -302,16 +309,6 @@ export function ProjectDetail({
         </h2>
         <FilesList documents={documents} projectId={project.id} />
       </section>
-
-      {project.company_id && (
-        <section>
-          <ProjectChat
-            projectId={project.id}
-            messages={messages}
-            currentUserId={currentUserId}
-          />
-        </section>
-      )}
 
       <section>
         <LinkedItems entityType="project" entityId={project.id} links={links} />

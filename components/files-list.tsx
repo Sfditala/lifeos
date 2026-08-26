@@ -50,7 +50,7 @@ export function FilesList({
         <UploadFileDialog lifeAreaId={lifeAreaId} projectId={projectId} />
       </div>
       {documents.length > 0 ? (
-        <ul className="divide-y divide-border rounded-lg border border-border">
+        <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
           {documents.map((doc) => (
             <li key={doc.id} className="flex items-center gap-3 px-4 py-3">
               <span className="flex-1 truncate text-sm text-foreground">

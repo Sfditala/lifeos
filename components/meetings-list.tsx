@@ -40,7 +40,7 @@ export function MeetingsList({
         <AddMeetingDialog lifeAreaId={lifeAreaId} projectId={projectId} />
       </div>
       {meetings.length > 0 ? (
-        <ul className="divide-y divide-border rounded-lg border border-border">
+        <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
           {meetings.map((meeting) => {
             const isToday = meeting.starts_at.slice(0, 10) === todayIso;
             return (

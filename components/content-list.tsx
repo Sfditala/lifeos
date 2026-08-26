@@ -39,7 +39,7 @@ export function ContentList({
   }
 
   return (
-    <ul className="divide-y divide-border rounded-lg border border-border">
+    <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
       {items.map((item) => (
         <li key={item.id} className="flex items-center gap-3 px-4 py-3">
           <span

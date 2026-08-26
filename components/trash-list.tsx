@@ -46,7 +46,7 @@ export function TrashList({ rows }: { rows: TrashRow[] }) {
 
   return (
     <>
-      <ul className="divide-y divide-border rounded-lg border border-border">
+      <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
         {rows.map((row) => {
           const elapsed = daysSince(row.deletedAt);
           const remaining = Math.max(0, 30 - elapsed);

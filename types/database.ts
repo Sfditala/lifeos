@@ -1036,6 +1036,27 @@ export type Database = {
           },
         ]
       }
+      user_settings: {
+        Row: {
+          accent_color: string | null
+          display_name: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          accent_color?: string | null
+          display_name?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          accent_color?: string | null
+          display_name?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -88,7 +88,7 @@ export default async function HabitsPage() {
       </div>
 
       {habits && habits.length > 0 ? (
-        <ul className="divide-y divide-border rounded-lg border border-border">
+        <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
           {habits.map((habit) => {
             const dates = logsByHabit.get(habit.id) ?? new Set<string>();
             const days = weekDates.map((date) => ({

@@ -40,7 +40,7 @@ export default async function ReviewsPage() {
       </div>
 
       {reviews && reviews.length > 0 ? (
-        <ul className="divide-y divide-border rounded-lg border border-border">
+        <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
           {reviews.map((review) => (
             <li key={review.id} className="flex items-center gap-3 px-4 py-3">
               <Badge variant="outline">

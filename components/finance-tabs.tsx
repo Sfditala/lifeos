@@ -117,7 +117,7 @@ export function FinanceTabs({
 
       <TabsContent value="overview">
         <div className="grid gap-6 sm:grid-cols-2">
-          <div className="rounded-lg border border-border bg-card p-4">
+          <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
             <h3 className="mb-2 text-sm font-semibold text-foreground">
               {t("expenseByCategory")}
             </h3>
@@ -127,7 +127,7 @@ export function FinanceTabs({
               <p className="text-sm text-muted-foreground">{t("emptyTransactions")}</p>
             )}
           </div>
-          <div className="rounded-lg border border-border bg-card p-4">
+          <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
             <h3 className="mb-2 text-sm font-semibold text-foreground">
               {t("monthlyFlow")}
             </h3>
@@ -153,7 +153,7 @@ export function FinanceTabs({
             {accounts.map((a) => (
               <li
                 key={a.id}
-                className="rounded-lg border border-border bg-card p-4"
+                className="rounded-lg border border-border bg-card p-4 shadow-sm"
               >
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-foreground">
@@ -195,7 +195,7 @@ export function FinanceTabs({
           <AddTransactionDialog accounts={accounts} areas={areas} />
         </div>
         {transactions.length > 0 ? (
-          <ul className="divide-y divide-border rounded-lg border border-border">
+          <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
             {transactions.map((tx) => (
               <li key={tx.id} className="flex items-center gap-3 px-4 py-3">
                 <span className="flex-1 text-sm text-foreground">
@@ -250,7 +250,7 @@ export function FinanceTabs({
               return (
                 <li
                   key={b.id}
-                  className="rounded-lg border border-border bg-card p-4"
+                  className="rounded-lg border border-border bg-card p-4 shadow-sm"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-foreground">
@@ -299,7 +299,7 @@ export function FinanceTabs({
               return (
                 <li
                   key={g.id}
-                  className="rounded-lg border border-border bg-card p-4"
+                  className="rounded-lg border border-border bg-card p-4 shadow-sm"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-foreground">

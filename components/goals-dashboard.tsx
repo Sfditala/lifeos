@@ -75,7 +75,7 @@ function GoalTierSection({
             return (
               <li
                 key={goal.id}
-                className="rounded-lg border border-border bg-card p-4"
+                className="rounded-xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md"
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="flex-1 text-sm font-medium text-foreground">
@@ -167,7 +167,13 @@ export function GoalsDashboard({
           <h2 className="mb-3 text-sm font-semibold text-foreground">
             {t("progressOverview")}
           </h2>
-          <div className="rounded-lg border border-border bg-card p-4">
+          <div
+            className="relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-md"
+            style={{
+              backgroundImage:
+                "radial-gradient(120% 140% at 100% 0%, color-mix(in oklab, var(--primary) 16%, transparent), transparent 55%)",
+            }}
+          >
             <HorizontalBarChart data={overviewChartData} />
           </div>
         </section>

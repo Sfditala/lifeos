@@ -1,4 +1,4 @@
-import { Download, LayoutDashboard, Trash2 } from "lucide-react";
+import { Download, LayoutDashboard, Settings, Trash2 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -55,12 +55,30 @@ export default async function AppLayout({
   const sheetSide = locale === "ar" ? "right" : "left";
   await claimTeamInvites();
   const areas = await getLifeAreas();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data: settings } = user
+    ? await supabase
+        .from("user_settings")
+        .select("accent_color")
+        .eq("user_id", user.id)
+        .maybeSingle()
+    : { data: null };
   const tApp = await getTranslations("app");
   const tNav = await getTranslations("nav");
   const tCommon = await getTranslations("common");
 
   return (
-    <div className="flex flex-1">
+    <div
+      className="flex flex-1"
+      style={
+        settings?.accent_color
+          ? ({ "--primary": settings.accent_color } as React.CSSProperties)
+          : undefined
+      }
+    >
       <aside className="hidden w-60 shrink-0 border-e border-border p-4 md:block">
         <Link
           href="/"
@@ -105,6 +123,13 @@ export default async function AppLayout({
             >
               <Download className="h-4 w-4" />
             </a>
+            <Link
+              href="/settings"
+              aria-label={tNav("settings")}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <Settings className="h-4 w-4" />
+            </Link>
             <LanguageSwitcher />
             <ThemeToggle />
             <LogoutButton />

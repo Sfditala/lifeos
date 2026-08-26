@@ -24,7 +24,8 @@
     "notes": "الملاحظات",
     "reviews": "المراجعات",
     "finance": "المال",
-    "companies": "الفرق والشركات"
+    "companies": "الفرق والشركات",
+    "settings": "الإعدادات"
   },
   "common": {
     "add": "إضافة",
@@ -125,6 +126,7 @@
   },
   "home": {
     "welcome": "أهلاً بك",
+    "lifeAreas": "مجالات الحياة",
     "today": "مهام اليوم",
     "overdue": "المهام المتأخرة",
     "upcoming": "أقرب المواعيد",
@@ -345,5 +347,14 @@
     "suggestionGrowth": "التطوير الذاتي والتعلم",
     "suggestionJob": "الوظيفة",
     "suggestionCompany": "الشركة / العمل الخاص"
+  },
+  "settings": {
+    "title": "الإعدادات الشخصية",
+    "displayName": "الاسم المعروض",
+    "displayNamePlaceholder": "اسمك",
+    "accentColor": "لون التمييز الشخصي",
+    "accentDefault": "اللون الافتراضي",
+    "lifeAreas": "مجالات الحياة",
+    "emptyLifeAreas": "لا يوجد مجالات حياة بعد"
   }
 }

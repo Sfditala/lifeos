@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { TaskCheckbox } from "@/components/task-checkbox";
 import { QuickAddTask } from "@/components/quick-add-task";
 import { GoalsDashboard } from "@/components/goals-dashboard";
+import { AreaCardGrid } from "@/components/area-card-grid";
 import { Badge } from "@/components/ui/badge";
 import { computeGoalProgress } from "@/lib/goals";
 
@@ -24,6 +25,7 @@ export default async function HomePage() {
     { data: allTasks },
     { data: areas },
     { data: upcomingMeetings },
+    { data: allProjects },
   ] = await Promise.all([
     supabase
       .from("tasks")
@@ -48,11 +50,11 @@ export default async function HomePage() {
       .order("created_at", { ascending: true }),
     supabase
       .from("tasks")
-      .select("life_area_id, status")
+      .select("life_area_id, status, due_date")
       .is("deleted_at", null),
     supabase
       .from("life_areas")
-      .select("id, name")
+      .select("id, name, color")
       .is("deleted_at", null)
       .order("sort_order", { ascending: true }),
     supabase
@@ -62,10 +64,38 @@ export default async function HomePage() {
       .gte("starts_at", nowIso)
       .lte("starts_at", in72h)
       .order("starts_at", { ascending: true }),
+    supabase
+      .from("projects")
+      .select("life_area_id, status")
+      .is("deleted_at", null),
   ]);
 
   const progressMap = computeGoalProgress(goals ?? [], allTasks ?? []);
   const progress = Object.fromEntries(progressMap);
+
+  const activeProjectsByArea = new Map<string, number>();
+  for (const p of allProjects ?? []) {
+    if (p.status !== "active") continue;
+    activeProjectsByArea.set(
+      p.life_area_id,
+      (activeProjectsByArea.get(p.life_area_id) ?? 0) + 1,
+    );
+  }
+  const overdueByArea = new Map<string, number>();
+  for (const task of allTasks ?? []) {
+    if (task.status === "done" || !task.due_date || task.due_date >= today) continue;
+    overdueByArea.set(
+      task.life_area_id,
+      (overdueByArea.get(task.life_area_id) ?? 0) + 1,
+    );
+  }
+  const areaCards = (areas ?? []).map((area) => ({
+    id: area.id,
+    name: area.name,
+    color: area.color,
+    activeProjects: activeProjectsByArea.get(area.id) ?? 0,
+    overdueTasks: overdueByArea.get(area.id) ?? 0,
+  }));
 
   const { data: recurringTx } = await supabase
     .from("transactions")
@@ -126,6 +156,15 @@ export default async function HomePage() {
         lifeAreas={areas ?? []}
       />
 
+      {areaCards.length > 0 && (
+        <section>
+          <h2 className="mb-3 text-sm font-semibold text-foreground">
+            {t("lifeAreas")}
+          </h2>
+          <AreaCardGrid areas={areaCards} />
+        </section>
+      )}
+
       <QuickAddTask areas={areas ?? []} />
 
       {dueRecurring.length > 0 && (
@@ -151,7 +190,7 @@ export default async function HomePage() {
           <h2 className="mb-3 text-sm font-semibold text-destructive">
             {t("overdue")}
           </h2>
-          <ul className="divide-y divide-border rounded-lg border border-border">
+          <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
             {overdueTasks.map((task) => (
               <li
                 key={task.id}
@@ -175,7 +214,7 @@ export default async function HomePage() {
           {t("today")}
         </h2>
         {todayTasks && todayTasks.length > 0 ? (
-          <ul className="divide-y divide-border rounded-lg border border-border">
+          <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
             {todayTasks.map((task) => (
               <li
                 key={task.id}
@@ -198,7 +237,7 @@ export default async function HomePage() {
           {tMeetings("upcoming")}
         </h2>
         {upcomingMeetings && upcomingMeetings.length > 0 ? (
-          <ul className="divide-y divide-border rounded-lg border border-border">
+          <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
             {upcomingMeetings.map((meeting) => (
               <li
                 key={meeting.id}
