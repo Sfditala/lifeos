@@ -12,6 +12,7 @@ import {
 } from "@/lib/goals";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   Dialog,
@@ -27,6 +28,7 @@ type GoalOption = { id: string; title: string; period_type: GoalPeriodType };
 type Initial = {
   id: string;
   title: string;
+  description?: string | null;
   target_date: string | null;
   period_type?: GoalPeriodType;
   parent_goal_id?: string | null;
@@ -138,6 +140,20 @@ export function AddGoalDialog({
             />
           </div>
 
+          <div className="space-y-1">
+            <Label htmlFor="description">{tGoals("description")}</Label>
+            <Textarea
+              id="description"
+              name="description"
+              rows={3}
+              placeholder={tGoals("descriptionPlaceholder")}
+              defaultValue={initial?.description ?? undefined}
+            />
+            <p className="text-xs text-muted-foreground">
+              {tGoals("descriptionHint")}
+            </p>
+          </div>
+
           {hierarchical && parentTier && (
             <div className="space-y-1">
               <Label htmlFor="parent_goal_id">{tGoals("parentGoal")}</Label>
@@ -154,6 +170,9 @@ export function AddGoalDialog({
                   </option>
                 ))}
               </select>
+              <p className="text-xs text-muted-foreground">
+                {tGoals("parentGoalHint")}
+              </p>
             </div>
           )}
 
@@ -173,6 +192,9 @@ export function AddGoalDialog({
                   </option>
                 ))}
               </select>
+              <p className="text-xs text-muted-foreground">
+                {tGoals("lifeAreaHint")}
+              </p>
             </div>
           )}
 

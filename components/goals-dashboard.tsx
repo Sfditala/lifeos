@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 type Goal = {
   id: string;
   title: string;
+  description: string | null;
   status: string;
   target_date: string | null;
   period_type: GoalPeriodType;
@@ -101,6 +102,11 @@ function GoalTierSection({
                     )}
                   />
                 </div>
+                {goal.description && (
+                  <p className="mt-1.5 text-xs text-muted-foreground">
+                    {goal.description}
+                  </p>
+                )}
                 {goal.target_date && (
                   <p className="mt-1 text-xs text-muted-foreground">
                     {goal.target_date}

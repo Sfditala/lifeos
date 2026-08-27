@@ -103,6 +103,7 @@ export async function createGoal(formData: FormData) {
   const { supabase, userId } = await requireUserId();
   const lifeAreaId = str(formData, "life_area_id");
   const title = str(formData, "title");
+  const description = str(formData, "description");
   const targetDate = str(formData, "target_date");
   const periodType = (str(formData, "period_type") ??
     "yearly") as GoalPeriodType;
@@ -126,6 +127,7 @@ export async function createGoal(formData: FormData) {
     user_id: userId,
     life_area_id: lifeAreaId,
     title,
+    description,
     target_date: targetDate,
     period_type: periodType,
     parent_goal_id: parentGoalId,
@@ -150,6 +152,7 @@ export async function updateGoalStatus(goalId: string, status: string) {
 export async function updateGoal(goalId: string, formData: FormData) {
   const { supabase } = await requireUserId();
   const title = str(formData, "title");
+  const description = str(formData, "description");
   const targetDate = str(formData, "target_date");
   const lifeAreaId = str(formData, "life_area_id");
   const parentGoalId = str(formData, "parent_goal_id");
@@ -181,6 +184,7 @@ export async function updateGoal(goalId: string, formData: FormData) {
     .from("goals")
     .update({
       title,
+      description,
       target_date: targetDate,
       life_area_id: lifeAreaId,
       parent_goal_id: parentGoalId,

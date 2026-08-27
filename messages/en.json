@@ -164,7 +164,12 @@
     "emptyMonthly": "No monthly goals yet",
     "emptyWeekly": "No goals for this week yet",
     "periodType": "Goal type",
+    "description": "Goal description",
+    "descriptionPlaceholder": "Why does this goal matter to you? What exactly will \"achieving it\" look like?",
+    "descriptionHint": "Write the details here — why this goal matters and what \"done\" actually means. Helps you come back to it during your weekly/monthly review and remember why you started.",
     "parentGoal": "Parent goal",
+    "parentGoalHint": "The path to get there: link it to a bigger goal above it (e.g. a monthly goal under a yearly one) — its progress automatically becomes part of the bigger goal's progress.",
+    "lifeAreaHint": "The path to get there: link it to a life area — its progress is calculated automatically from your real task completion in that area, not a number you type in.",
     "periodStart": "Week start",
     "periodEnd": "Week end",
     "startWeeklyReview": "Start weekly review"

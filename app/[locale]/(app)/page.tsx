@@ -44,7 +44,7 @@ export default async function HomePage() {
     supabase
       .from("goals")
       .select(
-        "id, title, status, target_date, period_type, parent_goal_id, life_area_id, period_start, period_end",
+        "id, title, description, status, target_date, period_type, parent_goal_id, life_area_id, period_start, period_end",
       )
       .is("deleted_at", null)
       .order("created_at", { ascending: true }),
