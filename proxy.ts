@@ -42,8 +42,12 @@ export async function proxy(request: NextRequest) {
     "/";
   const isLoginPage = pathWithoutLocale === "/login";
   const isOnboardingPage = pathWithoutLocale === "/onboarding";
+  const isPublicAuthPage =
+    isLoginPage ||
+    pathWithoutLocale === "/forgot-password" ||
+    pathWithoutLocale === "/reset-password";
 
-  if (!user && !isLoginPage) {
+  if (!user && !isPublicAuthPage) {
     const url = request.nextUrl.clone();
     url.pathname = `/${locale}/login`;
     return NextResponse.redirect(url);

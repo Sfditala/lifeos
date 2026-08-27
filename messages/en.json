@@ -8,7 +8,25 @@
     "password": "Password",
     "submit": "Sign in",
     "loading": "Checking...",
-    "error": "Incorrect email or password"
+    "error": "Incorrect email or password",
+    "forgotPassword": "Forgot your password?"
+  },
+  "forgotPassword": {
+    "title": "Enter your email and we'll send you a link to set a new password",
+    "submit": "Send reset link",
+    "loading": "Sending...",
+    "error": "Couldn't send the link, try again",
+    "checkEmail": "Check your email and open the link to set a new password",
+    "backToLogin": "Back to sign in"
+  },
+  "resetPassword": {
+    "title": "Set a new password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm password",
+    "submit": "Save password",
+    "tooShort": "Password must be at least 8 characters",
+    "mismatch": "Passwords don't match",
+    "error": "Couldn't update the password, try the reset link again"
   },
   "nav": {
     "logout": "Sign out",

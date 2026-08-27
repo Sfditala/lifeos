@@ -2,32 +2,40 @@
 
 import { useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export default function LoginPage() {
-  const t = useTranslations("login");
+export default function ResetPasswordPage() {
+  const t = useTranslations("resetPassword");
+  const tLogin = useTranslations("login");
   const tApp = useTranslations("app");
   const router = useRouter();
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setLoading(true);
     setError(null);
 
+    if (password.length < 8) {
+      setError(t("tooShort"));
+      return;
+    }
+    if (password !== confirm) {
+      setError(t("mismatch"));
+      return;
+    }
+
+    setLoading(true);
     const supabase = createClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
+    const { error: updateError } = await supabase.auth.updateUser({
       password,
     });
-
     setLoading(false);
 
-    if (signInError) {
+    if (updateError) {
       setError(t("error"));
       return;
     }
@@ -46,33 +54,33 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
-            <label htmlFor="email" className="text-sm text-muted-foreground">
-              {t("email")}
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-foreground outline-none focus:border-ring"
-            />
-          </div>
-
-          <div className="space-y-1">
             <label htmlFor="password" className="text-sm text-muted-foreground">
-              {t("password")}
+              {t("newPassword")}
             </label>
             <input
               id="password"
               name="password"
               type="password"
-              autoComplete="current-password"
+              autoComplete="new-password"
               required
               value={password}
               onChange={(event) => setPassword(event.target.value)}
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-foreground outline-none focus:border-ring"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label htmlFor="confirm" className="text-sm text-muted-foreground">
+              {t("confirmPassword")}
+            </label>
+            <input
+              id="confirm"
+              name="confirm"
+              type="password"
+              autoComplete="new-password"
+              required
+              value={confirm}
+              onChange={(event) => setConfirm(event.target.value)}
               className="w-full rounded-md border border-border bg-background px-3 py-2 text-foreground outline-none focus:border-ring"
             />
           </div>
@@ -84,16 +92,9 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full rounded-md bg-primary px-4 py-2 text-primary-foreground transition-opacity disabled:opacity-50"
           >
-            {loading ? t("loading") : t("submit")}
+            {loading ? tLogin("loading") : t("submit")}
           </button>
         </form>
-
-        <Link
-          href="/forgot-password"
-          className="block text-center text-sm text-muted-foreground hover:text-foreground"
-        >
-          {t("forgotPassword")}
-        </Link>
       </div>
     </div>
   );
