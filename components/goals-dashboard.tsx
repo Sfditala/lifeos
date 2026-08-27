@@ -79,9 +79,12 @@ function GoalTierSection({
                 className="rounded-xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="flex-1 text-sm font-medium text-foreground">
+                  <Link
+                    href={`/goals/${goal.id}`}
+                    className="flex-1 text-sm font-medium text-foreground hover:underline"
+                  >
                     {goal.title}
-                  </span>
+                  </Link>
                   <StatusBadge status={goal.status} />
                   <RowMenu
                     deleteTitle={tCommon("confirmDeleteTitle")}

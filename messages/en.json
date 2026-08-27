@@ -56,6 +56,7 @@
     "priority": "Priority",
     "status": "Status",
     "lifeArea": "Life area",
+    "progress": "Progress",
     "project": "Project",
     "goal": "Goal",
     "task": "Task",
@@ -172,7 +173,12 @@
     "lifeAreaHint": "The path to get there: link it to a life area — its progress is calculated automatically from your real task completion in that area, not a number you type in.",
     "periodStart": "Week start",
     "periodEnd": "Week end",
-    "startWeeklyReview": "Start weekly review"
+    "startWeeklyReview": "Start weekly review",
+    "partOf": "Part of:",
+    "subGoals": "Sub-goals",
+    "emptySubGoals": "No sub-goals yet",
+    "linkedProjects": "Linked projects",
+    "lifeAreaFor": "Project's life area"
   },
   "habits": {
     "title": "Habits",
