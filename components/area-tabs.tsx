@@ -97,15 +97,17 @@ export function AreaTabs({
   const tCommon = useTranslations("common");
   const tStatus = useTranslations("status");
 
-  const statusCounts = { todo: 0, doing: 0, done: 0 };
+  const statusCounts = { backlog: 0, ready: 0, in_progress: 0, in_review: 0, done: 0 };
   for (const task of tasks) {
     if (task.status in statusCounts) {
       statusCounts[task.status as keyof typeof statusCounts] += 1;
     }
   }
   const statusChartData = [
-    { name: tStatus("todo"), value: statusCounts.todo, color: "var(--muted-foreground)" },
-    { name: tStatus("doing"), value: statusCounts.doing, color: "#F59E0B" },
+    { name: tStatus("backlog"), value: statusCounts.backlog, color: "var(--muted-foreground)" },
+    { name: tStatus("ready"), value: statusCounts.ready, color: "#0EA5E9" },
+    { name: tStatus("in_progress"), value: statusCounts.in_progress, color: "#F59E0B" },
+    { name: tStatus("in_review"), value: statusCounts.in_review, color: "#8B5CF6" },
     { name: tStatus("done"), value: statusCounts.done, color: "#10B981" },
   ];
 

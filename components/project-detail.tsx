@@ -15,6 +15,7 @@ import { FilesList } from "@/components/files-list";
 import { DonutChart } from "@/components/charts/donut-chart";
 import { LinkedItems } from "@/components/linked-items";
 import { ProjectChat } from "@/components/project-chat";
+import { TaskBoard } from "@/components/task-board";
 import { formatDurationMinutes } from "@/lib/format-duration";
 import {
   deleteProject,
@@ -105,15 +106,17 @@ export function ProjectDetail({
   const projectForTaskDialog = [{ id: project.id, name: project.name }];
   const emailByAssigneeId = new Map(assignees.map((a) => [a.id, a.email]));
 
-  const statusCounts = { todo: 0, doing: 0, done: 0 };
+  const statusCounts = { backlog: 0, ready: 0, in_progress: 0, in_review: 0, done: 0 };
   for (const task of tasks) {
     if (task.status in statusCounts) {
       statusCounts[task.status as keyof typeof statusCounts] += 1;
     }
   }
   const statusChartData = [
-    { name: tStatus("todo"), value: statusCounts.todo, color: "var(--muted-foreground)" },
-    { name: tStatus("doing"), value: statusCounts.doing, color: "#F59E0B" },
+    { name: tStatus("backlog"), value: statusCounts.backlog, color: "var(--muted-foreground)" },
+    { name: tStatus("ready"), value: statusCounts.ready, color: "#0EA5E9" },
+    { name: tStatus("in_progress"), value: statusCounts.in_progress, color: "#F59E0B" },
+    { name: tStatus("in_review"), value: statusCounts.in_review, color: "#8B5CF6" },
     { name: tStatus("done"), value: statusCounts.done, color: "#10B981" },
   ];
   const totalTasks = tasks.length;
@@ -247,47 +250,51 @@ export function ProjectDetail({
           />
         </div>
         {tasks.length > 0 ? (
-          <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
-            {tasks.map((task) => (
-              <li key={task.id} className="flex items-center gap-3 px-4 py-3">
-                <TaskCheckbox taskId={task.id} done={task.status === "done"} />
-                <span className="flex-1 text-sm text-foreground">
-                  {task.title}
-                </span>
-                {task.assigned_to && emailByAssigneeId.get(task.assigned_to) && (
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                    {emailByAssigneeId.get(task.assigned_to)}
+          project.company_id ? (
+            <TaskBoard tasks={tasks} assignees={assignees} />
+          ) : (
+            <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
+              {tasks.map((task) => (
+                <li key={task.id} className="flex items-center gap-3 px-4 py-3">
+                  <TaskCheckbox taskId={task.id} done={task.status === "done"} />
+                  <span className="flex-1 text-sm text-foreground">
+                    {task.title}
                   </span>
-                )}
-                {task.duration_minutes != null && (
-                  <span className="text-xs text-muted-foreground">
-                    {formatDurationMinutes(task.duration_minutes, durationLabels)}
-                  </span>
-                )}
-                {task.due_date && (
-                  <span className="text-xs text-muted-foreground">
-                    {task.due_date}
-                  </span>
-                )}
-                <PriorityBadge priority={task.priority} />
-                <RowMenu
-                  deleteTitle={tCommon("confirmDeleteTitle")}
-                  deleteImpact={tCommon("deleteSimpleImpact")}
-                  onDelete={() => deleteTask(task.id)}
-                  renderEdit={(open, onOpenChange) => (
-                    <AddTaskDialog
-                      lifeAreaId={areaId}
-                      projects={projectForTaskDialog}
-                      assignees={assignees}
-                      initial={{ ...task, project_id: project.id }}
-                      open={open}
-                      onOpenChange={onOpenChange}
-                    />
+                  {task.assigned_to && emailByAssigneeId.get(task.assigned_to) && (
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                      {emailByAssigneeId.get(task.assigned_to)}
+                    </span>
                   )}
-                />
-              </li>
-            ))}
-          </ul>
+                  {task.duration_minutes != null && (
+                    <span className="text-xs text-muted-foreground">
+                      {formatDurationMinutes(task.duration_minutes, durationLabels)}
+                    </span>
+                  )}
+                  {task.due_date && (
+                    <span className="text-xs text-muted-foreground">
+                      {task.due_date}
+                    </span>
+                  )}
+                  <PriorityBadge priority={task.priority} />
+                  <RowMenu
+                    deleteTitle={tCommon("confirmDeleteTitle")}
+                    deleteImpact={tCommon("deleteSimpleImpact")}
+                    onDelete={() => deleteTask(task.id)}
+                    renderEdit={(open, onOpenChange) => (
+                      <AddTaskDialog
+                        lifeAreaId={areaId}
+                        projects={projectForTaskDialog}
+                        assignees={assignees}
+                        initial={{ ...task, project_id: project.id }}
+                        open={open}
+                        onOpenChange={onOpenChange}
+                      />
+                    )}
+                  />
+                </li>
+              ))}
+            </ul>
+          )
         ) : (
           <EmptyState
             icon={ListTodo}

@@ -337,8 +337,21 @@ export async function toggleTaskDone(taskId: string, done: boolean) {
   const { error } = await supabase
     .from("tasks")
     .update({
-      status: done ? "done" : "todo",
+      status: done ? "done" : "backlog",
       completed_at: done ? new Date().toISOString() : null,
+    })
+    .eq("id", taskId);
+  if (error) throw error;
+  revalidatePath("/", "layout");
+}
+
+export async function updateTaskStatus(taskId: string, status: string) {
+  const { supabase } = await requireUserId();
+  const { error } = await supabase
+    .from("tasks")
+    .update({
+      status,
+      completed_at: status === "done" ? new Date().toISOString() : null,
     })
     .eq("id", taskId);
   if (error) throw error;

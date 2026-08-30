@@ -8,6 +8,10 @@ const STATUS_CLASSES: Record<string, string> = {
   done: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
   paused: "bg-muted text-muted-foreground",
   dropped: "bg-muted text-muted-foreground line-through",
+  backlog: "bg-muted text-muted-foreground",
+  ready: "bg-sky-500/15 text-sky-600 dark:text-sky-400",
+  in_progress: "bg-amber-500/15 text-amber-600 dark:text-amber-400",
+  in_review: "bg-violet-500/15 text-violet-600 dark:text-violet-400",
 };
 
 export function StatusBadge({ status }: { status: string }) {
