@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { GripVertical } from "lucide-react";
 import {
   DndContext,
   DragOverlay,
@@ -13,10 +14,12 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
-import { updateTaskStatus } from "@/lib/actions";
+import { deleteTask, updateTaskStatus } from "@/lib/actions";
 import { TASK_STATUS_STAGES, type TaskStatus } from "@/lib/tasks";
 import { formatDurationMinutes } from "@/lib/format-duration";
 import { PriorityBadge } from "@/components/status-badge";
+import { AddTaskDialog } from "@/components/add-task-dialog";
+import { RowMenu } from "@/components/row-menu";
 
 type Assignee = { id: string; email: string };
 type Task = {
@@ -60,10 +63,18 @@ function TaskCard({
   task,
   assignee,
   dragging,
+  lifeAreaId,
+  projectId,
+  projectName,
+  assignees,
 }: {
   task: Task;
   assignee: Assignee | undefined;
   dragging?: boolean;
+  lifeAreaId: string;
+  projectId: string;
+  projectName: string;
+  assignees: Assignee[];
 }) {
   const tCommon = useTranslations("common");
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
@@ -79,19 +90,42 @@ function TaskCard({
   return (
     <div
       ref={setNodeRef}
-      {...listeners}
-      {...attributes}
       style={
         transform
           ? { transform: `translate(${transform.x}px, ${transform.y}px)` }
           : undefined
       }
-      className={`cursor-grab touch-none rounded-lg border border-border bg-card p-3 shadow-sm transition-shadow active:cursor-grabbing ${
+      className={`rounded-lg border border-border bg-card p-3 shadow-sm transition-shadow ${
         dragging ? "opacity-40" : "hover:shadow-md"
       }`}
     >
-      <p className="text-sm font-medium text-foreground">{task.title}</p>
-      <div className="mt-2 flex items-center justify-between gap-2">
+      <div className="flex items-start gap-1.5">
+        <button
+          type="button"
+          {...listeners}
+          {...attributes}
+          className="mt-0.5 cursor-grab touch-none text-muted-foreground/50 hover:text-muted-foreground active:cursor-grabbing"
+        >
+          <GripVertical className="h-3.5 w-3.5" />
+        </button>
+        <p className="flex-1 text-sm font-medium text-foreground">{task.title}</p>
+        <RowMenu
+          deleteTitle={tCommon("confirmDeleteTitle")}
+          deleteImpact={tCommon("deleteSimpleImpact")}
+          onDelete={() => deleteTask(task.id)}
+          renderEdit={(open, onOpenChange) => (
+            <AddTaskDialog
+              lifeAreaId={lifeAreaId}
+              projects={[{ id: projectId, name: projectName }]}
+              assignees={assignees}
+              initial={{ ...task, project_id: projectId }}
+              open={open}
+              onOpenChange={onOpenChange}
+            />
+          )}
+        />
+      </div>
+      <div className="mt-2 flex items-center justify-between gap-2 ps-5">
         <div className="flex items-center gap-1.5">
           <PriorityBadge priority={task.priority} />
           {durationLabel && (
@@ -110,12 +144,20 @@ function Column({
   tasks,
   assigneeById,
   activeId,
+  lifeAreaId,
+  projectId,
+  projectName,
+  assignees,
 }: {
   status: TaskStatus;
   label: string;
   tasks: Task[];
   assigneeById: Map<string, Assignee>;
   activeId: string | null;
+  lifeAreaId: string;
+  projectId: string;
+  projectName: string;
+  assignees: Assignee[];
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
@@ -143,6 +185,10 @@ function Column({
             task={task}
             assignee={task.assigned_to ? assigneeById.get(task.assigned_to) : undefined}
             dragging={activeId === task.id}
+            lifeAreaId={lifeAreaId}
+            projectId={projectId}
+            projectName={projectName}
+            assignees={assignees}
           />
         ))}
       </div>
@@ -153,13 +199,23 @@ function Column({
 export function TaskBoard({
   tasks: initialTasks,
   assignees,
+  lifeAreaId,
+  projectId,
+  projectName,
 }: {
   tasks: Task[];
   assignees: Assignee[];
+  lifeAreaId: string;
+  projectId: string;
+  projectName: string;
 }) {
   const tStatus = useTranslations("status");
   const [tasks, setTasks] = useState(initialTasks);
   const [activeId, setActiveId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setTasks(initialTasks);
+  }, [initialTasks]);
 
   const assigneeById = useMemo(
     () => new Map(assignees.map((a) => [a.id, a])),
@@ -205,6 +261,10 @@ export function TaskBoard({
             tasks={tasks.filter((t) => t.status === status)}
             assigneeById={assigneeById}
             activeId={activeId}
+            lifeAreaId={lifeAreaId}
+            projectId={projectId}
+            projectName={projectName}
+            assignees={assignees}
           />
         ))}
       </div>
@@ -215,6 +275,10 @@ export function TaskBoard({
             assignee={
               activeTask.assigned_to ? assigneeById.get(activeTask.assigned_to) : undefined
             }
+            lifeAreaId={lifeAreaId}
+            projectId={projectId}
+            projectName={projectName}
+            assignees={assignees}
           />
         ) : null}
       </DragOverlay>

@@ -251,7 +251,13 @@ export function ProjectDetail({
         </div>
         {tasks.length > 0 ? (
           project.company_id ? (
-            <TaskBoard tasks={tasks} assignees={assignees} />
+            <TaskBoard
+              tasks={tasks}
+              assignees={assignees}
+              lifeAreaId={areaId}
+              projectId={project.id}
+              projectName={project.name}
+            />
           ) : (
             <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
               {tasks.map((task) => (
