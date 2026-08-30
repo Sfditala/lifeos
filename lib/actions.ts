@@ -414,6 +414,11 @@ export async function createHabit(formData: FormData) {
   const name = str(formData, "name");
   const frequency = str(formData, "frequency") ?? "daily";
   const lifeAreaId = str(formData, "life_area_id");
+  const category = str(formData, "category");
+  const customDays =
+    frequency === "custom_days"
+      ? formData.getAll("custom_days").map((v) => Number(v))
+      : null;
   if (!name) throw new Error("Name is required");
 
   const { error } = await supabase.from("habits").insert({
@@ -421,6 +426,8 @@ export async function createHabit(formData: FormData) {
     name,
     frequency,
     life_area_id: lifeAreaId,
+    category,
+    custom_days: customDays,
   });
   if (error) throw error;
 
@@ -463,11 +470,16 @@ export async function updateHabit(habitId: string, formData: FormData) {
   const { supabase } = await requireUserId();
   const name = str(formData, "name");
   const frequency = str(formData, "frequency") ?? "daily";
+  const category = str(formData, "category");
+  const customDays =
+    frequency === "custom_days"
+      ? formData.getAll("custom_days").map((v) => Number(v))
+      : null;
   if (!name) throw new Error("Name is required");
 
   const { error } = await supabase
     .from("habits")
-    .update({ name, frequency })
+    .update({ name, frequency, category, custom_days: customDays })
     .eq("id", habitId);
   if (error) throw error;
 
