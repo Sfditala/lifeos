@@ -1015,6 +1015,7 @@ export async function createTransaction(formData: FormData) {
   const occurredAt = str(formData, "occurred_at");
   const note = str(formData, "note");
   const lifeAreaId = str(formData, "life_area_id");
+  const companyId = str(formData, "company_id");
   const isRecurring = formData.get("is_recurring") === "on";
   const recurrenceRule = str(formData, "recurrence_rule");
   if (!accountId || !occurredAt || !amount) throw new Error("Missing fields");
@@ -1023,6 +1024,7 @@ export async function createTransaction(formData: FormData) {
     user_id: userId,
     account_id: accountId,
     life_area_id: lifeAreaId,
+    company_id: companyId,
     amount: Math.abs(amount),
     direction,
     category,
@@ -1080,6 +1082,7 @@ export async function createFinancialGoal(formData: FormData) {
   const targetAmount = Number(str(formData, "target_amount") ?? "0");
   const currentAmount = Number(str(formData, "current_amount") ?? "0");
   const targetDate = str(formData, "target_date");
+  const companyId = str(formData, "company_id");
   if (!title || !targetAmount) throw new Error("Missing fields");
 
   const { error } = await supabase.from("financial_goals").insert({
@@ -1088,9 +1091,11 @@ export async function createFinancialGoal(formData: FormData) {
     target_amount: targetAmount,
     current_amount: currentAmount,
     target_date: targetDate,
+    company_id: companyId,
   });
   if (error) throw error;
   revalidatePath("/finance", "layout");
+  revalidatePath("/", "layout");
 }
 
 export async function updateFinancialGoal(
@@ -1115,6 +1120,7 @@ export async function updateFinancialGoal(
     .eq("id", goalId);
   if (error) throw error;
   revalidatePath("/finance", "layout");
+  revalidatePath("/", "layout");
 }
 
 export async function deleteFinancialGoal(goalId: string) {

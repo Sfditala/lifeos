@@ -26,10 +26,12 @@ type Initial = {
 
 export function AddFinancialGoalDialog({
   initial,
+  companyId,
   open: controlledOpen,
   onOpenChange: setControlledOpen,
 }: {
   initial?: Initial;
+  companyId?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 } = {}) {
@@ -72,6 +74,9 @@ export function AddFinancialGoalDialog({
           </DialogTitle>
         </DialogHeader>
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+          {companyId && (
+            <input type="hidden" name="company_id" value={companyId} />
+          )}
           <div className="space-y-1">
             <Label htmlFor="fg-title">{tCommon("title")}</Label>
             <Input

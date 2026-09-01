@@ -289,6 +289,7 @@
     "direction": "النوع",
     "income": "دخل",
     "expense": "مصروف",
+    "net": "الصافي",
     "category": "التصنيف",
     "source": "مصدر الدخل",
     "source_salary": "راتب / وظيفة",

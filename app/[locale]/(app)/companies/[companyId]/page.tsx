@@ -41,39 +41,65 @@ export default async function CompanyPage({
 
   const projectIds = (projects ?? []).map((p) => p.id);
 
-  const [{ data: lifeAreas }, { data: tasks }, { data: meetings }, { data: documents }] =
-    await Promise.all([
-      isOwner
-        ? supabase
-            .from("life_areas")
-            .select("id, name")
-            .is("deleted_at", null)
-            .order("sort_order", { ascending: true })
-        : Promise.resolve({ data: null }),
-      projectIds.length > 0
-        ? supabase
-            .from("tasks")
-            .select(
-              "id, title, status, priority, due_date, assigned_to, duration_minutes, project_id",
-            )
-            .in("project_id", projectIds)
-            .is("deleted_at", null)
-        : Promise.resolve({ data: [] }),
-      projectIds.length > 0
-        ? supabase
-            .from("meetings")
-            .select("id, title, starts_at, ends_at, location, notes, project_id")
-            .in("project_id", projectIds)
-            .is("deleted_at", null)
-            .order("starts_at", { ascending: true })
-        : Promise.resolve({ data: [] }),
-      supabase
-        .from("documents")
-        .select("id, file_name, file_type, size_bytes, storage_path, uploaded_at")
-        .eq("company_id", companyId)
-        .is("deleted_at", null)
-        .order("uploaded_at", { ascending: false }),
-    ]);
+  const [
+    { data: lifeAreas },
+    { data: tasks },
+    { data: meetings },
+    { data: documents },
+    { data: accounts },
+    { data: transactions },
+    { data: financialGoals },
+  ] = await Promise.all([
+    isOwner
+      ? supabase
+          .from("life_areas")
+          .select("id, name")
+          .is("deleted_at", null)
+          .order("sort_order", { ascending: true })
+      : Promise.resolve({ data: null }),
+    projectIds.length > 0
+      ? supabase
+          .from("tasks")
+          .select(
+            "id, title, status, priority, due_date, assigned_to, duration_minutes, project_id",
+          )
+          .in("project_id", projectIds)
+          .is("deleted_at", null)
+      : Promise.resolve({ data: [] }),
+    projectIds.length > 0
+      ? supabase
+          .from("meetings")
+          .select("id, title, starts_at, ends_at, location, notes, project_id")
+          .in("project_id", projectIds)
+          .is("deleted_at", null)
+          .order("starts_at", { ascending: true })
+      : Promise.resolve({ data: [] }),
+    supabase
+      .from("documents")
+      .select("id, file_name, file_type, size_bytes, storage_path, uploaded_at")
+      .eq("company_id", companyId)
+      .is("deleted_at", null)
+      .order("uploaded_at", { ascending: false }),
+    isOwner
+      ? supabase
+          .from("finance_accounts")
+          .select("id, name")
+          .is("deleted_at", null)
+          .order("created_at", { ascending: true })
+      : Promise.resolve({ data: [] }),
+    supabase
+      .from("transactions")
+      .select("id, amount, direction, category, occurred_at, note")
+      .eq("company_id", companyId)
+      .is("deleted_at", null)
+      .order("occurred_at", { ascending: false }),
+    supabase
+      .from("financial_goals")
+      .select("id, title, target_amount, current_amount, target_date")
+      .eq("company_id", companyId)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: true }),
+  ]);
 
   const assignees = (members ?? [])
     .filter((m) => m.status === "active" && m.user_id)
@@ -90,6 +116,16 @@ export default async function CompanyPage({
       documents={documents ?? []}
       lifeAreas={lifeAreas ?? []}
       assignees={assignees}
+      accounts={accounts ?? []}
+      transactions={(transactions ?? []).map((tx) => ({
+        ...tx,
+        amount: Number(tx.amount),
+      }))}
+      financialGoals={(financialGoals ?? []).map((g) => ({
+        ...g,
+        target_amount: Number(g.target_amount),
+        current_amount: Number(g.current_amount),
+      }))}
     />
   );
 }

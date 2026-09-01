@@ -24,9 +24,11 @@ type LifeArea = { id: string; name: string };
 export function AddTransactionDialog({
   accounts,
   areas,
+  companyId,
 }: {
   accounts: Account[];
   areas: LifeArea[];
+  companyId?: string;
 }) {
   const t = useTranslations("finance");
   const tCommon = useTranslations("common");
@@ -62,6 +64,9 @@ export function AddTransactionDialog({
           <DialogTitle>{t("newTransactionTitle")}</DialogTitle>
         </DialogHeader>
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+          {companyId && (
+            <input type="hidden" name="company_id" value={companyId} />
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label htmlFor="account_id">{t("account")}</Label>
