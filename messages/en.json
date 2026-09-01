@@ -359,7 +359,19 @@
     "position_hr": "HR",
     "position_support": "Support",
     "position_member": "General member",
-    "inviteHint": "After inviting, ask them to sign in with this exact email via the sign-in link — their membership activates automatically."
+    "inviteHint": "After inviting, ask them to sign in with this exact email via the sign-in link — their membership activates automatically.",
+    "overview": "Overview",
+    "tasks": "Tasks",
+    "meetings": "Meetings",
+    "files": "Files",
+    "team": "Team",
+    "activeProjects": "Active projects",
+    "overdueTasks": "Overdue tasks",
+    "teamSize": "Team size",
+    "upcomingMeetings": "Upcoming meetings (7 days)",
+    "taskStatusChart": "Tasks by status",
+    "projectCompletionChart": "Completion per project",
+    "emptyTasks": "No tasks yet"
   },
   "links": {
     "title": "Linked items",

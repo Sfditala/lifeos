@@ -252,11 +252,9 @@ export function ProjectDetail({
         {tasks.length > 0 ? (
           project.company_id ? (
             <TaskBoard
-              tasks={tasks}
+              tasks={tasks.map((t) => ({ ...t, project_id: project.id }))}
               assignees={assignees}
-              lifeAreaId={areaId}
-              projectId={project.id}
-              projectName={project.name}
+              projects={[{ id: project.id, name: project.name, life_area_id: areaId }]}
             />
           ) : (
             <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">

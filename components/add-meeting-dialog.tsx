@@ -24,7 +24,9 @@ type Initial = {
   ends_at: string | null;
   location: string | null;
   notes: string | null;
+  project_id?: string | null;
 };
+type ProjectOption = { id: string; name: string; life_area_id: string };
 
 function toLocalInputValue(iso?: string | null) {
   if (!iso) return undefined;
@@ -36,12 +38,14 @@ function toLocalInputValue(iso?: string | null) {
 export function AddMeetingDialog({
   lifeAreaId,
   projectId,
+  projects,
   initial,
   open: controlledOpen,
   onOpenChange: setControlledOpen,
 }: {
   lifeAreaId?: string;
   projectId?: string;
+  projects?: ProjectOption[];
   initial?: Initial;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -53,6 +57,9 @@ export function AddMeetingDialog({
   const open = isControlled ? controlledOpen : internalOpen;
   const setOpen = isControlled ? setControlledOpen! : setInternalOpen;
   const [pending, setPending] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState(
+    initial?.project_id ?? projects?.[0]?.id ?? "",
+  );
   const formRef = useRef<HTMLFormElement>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -67,6 +74,12 @@ export function AddMeetingDialog({
       startsLocal ? new Date(startsLocal).toISOString() : "",
     );
     formData.set("ends_at", endsLocal ? new Date(endsLocal).toISOString() : "");
+
+    if (projects) {
+      const chosen = projects.find((p) => p.id === selectedProjectId);
+      formData.set("project_id", chosen?.id ?? "");
+      formData.set("life_area_id", chosen?.life_area_id ?? "");
+    }
 
     if (initial) {
       await updateMeeting(initial.id, formData);
@@ -98,6 +111,27 @@ export function AddMeetingDialog({
           )}
           {projectId && (
             <input type="hidden" name="project_id" value={projectId} />
+          )}
+          {projects && (
+            <div className="space-y-1">
+              <Label htmlFor="meeting-project">{tCommon("project")}</Label>
+              <select
+                id="meeting-project"
+                value={selectedProjectId}
+                onChange={(e) => setSelectedProjectId(e.target.value)}
+                required
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+              >
+                <option value="" disabled>
+                  {tCommon("none")}
+                </option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           )}
           <div className="space-y-1">
             <Label htmlFor="meeting-title">{tCommon("title")}</Label>

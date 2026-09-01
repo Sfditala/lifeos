@@ -14,16 +14,20 @@ type Meeting = {
   ends_at: string | null;
   location: string | null;
   notes: string | null;
+  project_id?: string | null;
 };
+type ProjectOption = { id: string; name: string; life_area_id: string };
 
 export function MeetingsList({
   meetings,
   lifeAreaId,
   projectId,
+  projects,
 }: {
   meetings: Meeting[];
   lifeAreaId?: string;
   projectId?: string;
+  projects?: ProjectOption[];
 }) {
   const t = useTranslations("meetings");
   const tCommon = useTranslations("common");
@@ -37,7 +41,11 @@ export function MeetingsList({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex justify-end">
-        <AddMeetingDialog lifeAreaId={lifeAreaId} projectId={projectId} />
+        <AddMeetingDialog
+          lifeAreaId={lifeAreaId}
+          projectId={projectId}
+          projects={projects}
+        />
       </div>
       {meetings.length > 0 ? (
         <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
@@ -65,6 +73,7 @@ export function MeetingsList({
                     <AddMeetingDialog
                       lifeAreaId={lifeAreaId}
                       projectId={projectId}
+                      projects={projects}
                       initial={meeting}
                       open={open}
                       onOpenChange={onOpenChange}

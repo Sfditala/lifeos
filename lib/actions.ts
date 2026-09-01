@@ -707,6 +707,16 @@ export async function uploadDocument(formData: FormData) {
     throw new Error("File too large");
   }
 
+  let companyId: string | null = null;
+  if (projectId) {
+    const { data: project } = await supabase
+      .from("projects")
+      .select("company_id")
+      .eq("id", projectId)
+      .single();
+    companyId = project?.company_id ?? null;
+  }
+
   const storagePath = `${userId}/${crypto.randomUUID()}-${file.name}`;
   const { error: uploadError } = await supabase.storage
     .from("documents")
@@ -717,6 +727,7 @@ export async function uploadDocument(formData: FormData) {
     user_id: userId,
     life_area_id: lifeAreaId,
     project_id: projectId,
+    company_id: companyId,
     file_name: file.name,
     storage_path: storagePath,
     file_type: file.type || null,

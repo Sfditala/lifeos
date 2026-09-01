@@ -22,6 +22,7 @@ import { AddTaskDialog } from "@/components/add-task-dialog";
 import { RowMenu } from "@/components/row-menu";
 
 type Assignee = { id: string; email: string };
+type ProjectRef = { id: string; name: string; life_area_id: string };
 type Task = {
   id: string;
   title: string;
@@ -30,6 +31,7 @@ type Task = {
   due_date: string | null;
   assigned_to: string | null;
   duration_minutes: number | null;
+  project_id?: string | null;
 };
 
 const COLUMN_ACCENT: Record<TaskStatus, string> = {
@@ -63,23 +65,22 @@ function TaskCard({
   task,
   assignee,
   dragging,
-  lifeAreaId,
-  projectId,
-  projectName,
+  projects,
   assignees,
+  showProjectBadge,
 }: {
   task: Task;
   assignee: Assignee | undefined;
   dragging?: boolean;
-  lifeAreaId: string;
-  projectId: string;
-  projectName: string;
+  projects: ProjectRef[];
   assignees: Assignee[];
+  showProjectBadge: boolean;
 }) {
   const tCommon = useTranslations("common");
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: task.id,
   });
+  const project = projects.find((p) => p.id === task.project_id);
   const durationLabel = task.duration_minutes
     ? formatDurationMinutes(task.duration_minutes, {
         hour: tCommon("hourShort"),
@@ -115,21 +116,26 @@ function TaskCard({
           onDelete={() => deleteTask(task.id)}
           renderEdit={(open, onOpenChange) => (
             <AddTaskDialog
-              lifeAreaId={lifeAreaId}
-              projects={[{ id: projectId, name: projectName }]}
+              lifeAreaId={projects.length === 1 ? projects[0].id : undefined}
+              projects={projects}
               assignees={assignees}
-              initial={{ ...task, project_id: projectId }}
+              initial={{ ...task, project_id: task.project_id ?? null }}
               open={open}
               onOpenChange={onOpenChange}
             />
           )}
         />
       </div>
-      <div className="mt-2 flex items-center justify-between gap-2 ps-5">
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 ps-5">
         <div className="flex items-center gap-1.5">
           <PriorityBadge priority={task.priority} />
           {durationLabel && (
             <span className="text-[11px] text-muted-foreground">{durationLabel}</span>
+          )}
+          {showProjectBadge && project && (
+            <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
+              {project.name}
+            </span>
           )}
         </div>
         {assignee && <Avatar email={assignee.email} />}
@@ -144,20 +150,18 @@ function Column({
   tasks,
   assigneeById,
   activeId,
-  lifeAreaId,
-  projectId,
-  projectName,
+  projects,
   assignees,
+  showProjectBadge,
 }: {
   status: TaskStatus;
   label: string;
   tasks: Task[];
   assigneeById: Map<string, Assignee>;
   activeId: string | null;
-  lifeAreaId: string;
-  projectId: string;
-  projectName: string;
+  projects: ProjectRef[];
   assignees: Assignee[];
+  showProjectBadge: boolean;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
@@ -185,10 +189,9 @@ function Column({
             task={task}
             assignee={task.assigned_to ? assigneeById.get(task.assigned_to) : undefined}
             dragging={activeId === task.id}
-            lifeAreaId={lifeAreaId}
-            projectId={projectId}
-            projectName={projectName}
+            projects={projects}
             assignees={assignees}
+            showProjectBadge={showProjectBadge}
           />
         ))}
       </div>
@@ -199,19 +202,16 @@ function Column({
 export function TaskBoard({
   tasks: initialTasks,
   assignees,
-  lifeAreaId,
-  projectId,
-  projectName,
+  projects,
 }: {
   tasks: Task[];
   assignees: Assignee[];
-  lifeAreaId: string;
-  projectId: string;
-  projectName: string;
+  projects: ProjectRef[];
 }) {
   const tStatus = useTranslations("status");
   const [tasks, setTasks] = useState(initialTasks);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const showProjectBadge = projects.length > 1;
 
   useEffect(() => {
     setTasks(initialTasks);
@@ -261,10 +261,9 @@ export function TaskBoard({
             tasks={tasks.filter((t) => t.status === status)}
             assigneeById={assigneeById}
             activeId={activeId}
-            lifeAreaId={lifeAreaId}
-            projectId={projectId}
-            projectName={projectName}
+            projects={projects}
             assignees={assignees}
+            showProjectBadge={showProjectBadge}
           />
         ))}
       </div>
@@ -275,10 +274,9 @@ export function TaskBoard({
             assignee={
               activeTask.assigned_to ? assigneeById.get(activeTask.assigned_to) : undefined
             }
-            lifeAreaId={lifeAreaId}
-            projectId={projectId}
-            projectName={projectName}
+            projects={projects}
             assignees={assignees}
+            showProjectBadge={showProjectBadge}
           />
         ) : null}
       </DragOverlay>

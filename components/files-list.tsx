@@ -25,14 +25,18 @@ function formatSize(bytes: number | null) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+type ProjectOption = { id: string; name: string; life_area_id: string };
+
 export function FilesList({
   documents,
   lifeAreaId,
   projectId,
+  projects,
 }: {
   documents: DocumentRow[];
   lifeAreaId?: string;
   projectId?: string;
+  projects?: ProjectOption[];
 }) {
   const t = useTranslations("files");
   const tCommon = useTranslations("common");
@@ -47,7 +51,11 @@ export function FilesList({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex justify-end">
-        <UploadFileDialog lifeAreaId={lifeAreaId} projectId={projectId} />
+        <UploadFileDialog
+          lifeAreaId={lifeAreaId}
+          projectId={projectId}
+          projects={projects}
+        />
       </div>
       {documents.length > 0 ? (
         <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">

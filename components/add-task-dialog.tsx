@@ -16,7 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-type Project = { id: string; name: string };
+type Project = { id: string; name: string; life_area_id?: string };
 type Assignee = { id: string; email: string };
 type Initial = {
   id: string;
@@ -36,7 +36,7 @@ export function AddTaskDialog({
   open: controlledOpen,
   onOpenChange: setControlledOpen,
 }: {
-  lifeAreaId: string;
+  lifeAreaId?: string;
   projects: Project[];
   assignees?: Assignee[];
   initial?: Initial;
@@ -52,6 +52,9 @@ export function AddTaskDialog({
   const open = isControlled ? controlledOpen : internalOpen;
   const setOpen = isControlled ? setControlledOpen! : setInternalOpen;
   const [pending, setPending] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState(
+    initial?.project_id ?? projects[0]?.id ?? "",
+  );
   const formRef = useRef<HTMLFormElement>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -59,6 +62,11 @@ export function AddTaskDialog({
     if (!formRef.current) return;
     setPending(true);
     const formData = new FormData(formRef.current);
+    if (!lifeAreaId) {
+      const chosen = projects.find((p) => p.id === selectedProjectId);
+      formData.set("life_area_id", chosen?.life_area_id ?? "");
+      formData.set("project_id", chosen?.id ?? "");
+    }
     if (initial) {
       await updateTask(initial.id, formData);
     } else {
@@ -84,7 +92,9 @@ export function AddTaskDialog({
           </DialogTitle>
         </DialogHeader>
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
-          <input type="hidden" name="life_area_id" value={lifeAreaId} />
+          {lifeAreaId && (
+            <input type="hidden" name="life_area_id" value={lifeAreaId} />
+          )}
           <div className="space-y-1">
             <Label htmlFor="task-title">{tCommon("title")}</Label>
             <Input
@@ -133,19 +143,38 @@ export function AddTaskDialog({
           {projects.length > 0 && (
             <div className="space-y-1">
               <Label htmlFor="project_id">{tCommon("project")}</Label>
-              <select
-                id="project_id"
-                name="project_id"
-                defaultValue={initial?.project_id ?? ""}
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
-              >
-                <option value="">{tCommon("none")}</option>
-                {projects.map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.name}
+              {lifeAreaId ? (
+                <select
+                  id="project_id"
+                  name="project_id"
+                  defaultValue={initial?.project_id ?? ""}
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+                >
+                  <option value="">{tCommon("none")}</option>
+                  {projects.map((project) => (
+                    <option key={project.id} value={project.id}>
+                      {project.name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <select
+                  id="project_id"
+                  value={selectedProjectId}
+                  onChange={(e) => setSelectedProjectId(e.target.value)}
+                  required
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+                >
+                  <option value="" disabled>
+                    {tCommon("none")}
                   </option>
-                ))}
-              </select>
+                  {projects.map((project) => (
+                    <option key={project.id} value={project.id}>
+                      {project.name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
           )}
           {assignees && assignees.length > 0 && (
