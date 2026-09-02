@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { FolderKanban, ListTodo, Wallet, Trash2 } from "lucide-react";
+import { FolderKanban, ListTodo, Wallet, Trash2, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import {
@@ -19,6 +19,7 @@ import { RemoveMemberButton } from "@/components/remove-member-button";
 import { AddCompanyProjectDialog } from "@/components/add-company-project-dialog";
 import { EditCompanyDialog } from "@/components/edit-company-dialog";
 import { MemberPositionSelect } from "@/components/member-position-select";
+import { ActivityFeed } from "@/components/activity-feed";
 import { TaskBoard } from "@/components/task-board";
 import { AddTaskDialog } from "@/components/add-task-dialog";
 import { MeetingsList } from "@/components/meetings-list";
@@ -46,6 +47,7 @@ type Member = {
   role: string;
   status: string;
   position: string;
+  user_id: string | null;
 };
 type Project = { id: string; name: string; status: string; life_area_id: string };
 type Task = {
@@ -99,6 +101,15 @@ type Deal = {
   channel: string | null;
   deal_value: number | null;
   last_contacted_at: string | null;
+  converted_at: string | null;
+};
+type ActivityEntry = {
+  id: string;
+  actor_user_id: string | null;
+  action_type: string;
+  entity_label: string;
+  metadata: { amount?: number } | null;
+  created_at: string;
 };
 
 function todayIso() {
@@ -119,6 +130,7 @@ export function CompanyDetail({
   transactions,
   financialGoals,
   deals,
+  activityLog,
 }: {
   company: Company;
   isOwner: boolean;
@@ -133,12 +145,14 @@ export function CompanyDetail({
   transactions: Transaction[];
   financialGoals: FinancialGoal[];
   deals: Deal[];
+  activityLog: ActivityEntry[];
 }) {
   const t = useTranslations("team");
   const tAreas = useTranslations("areas");
   const tStatus = useTranslations("status");
   const tFinance = useTranslations("finance");
   const tCommon = useTranslations("common");
+  const tAnalytics = useTranslations("analytics");
   const locale = useLocale();
   const numberFormatter = new Intl.NumberFormat(
     locale === "ar" ? "ar-u-nu-latn" : "en",
@@ -218,6 +232,40 @@ export function CompanyDetail({
     .slice(-6)
     .map(([month, v]) => ({ month, income: v.income, expense: v.expense }));
 
+  const emailByUserId = new Map(
+    members.filter((m) => m.user_id).map((m) => [m.user_id as string, m.email]),
+  );
+
+  const workload = assignees.map((a) => {
+    const memberTasks = tasks.filter((task) => task.assigned_to === a.id);
+    const open = memberTasks.filter((task) => task.status !== "done").length;
+    const done = memberTasks.filter((task) => task.status === "done").length;
+    const overdue = memberTasks.filter(
+      (task) =>
+        task.due_date && task.due_date < today && task.status !== "done",
+    ).length;
+    return { email: a.email, open, done, overdue };
+  });
+  const workloadChartData = workload
+    .filter((w) => w.open > 0)
+    .sort((a, b) => b.open - a.open)
+    .map((w) => ({ name: w.email, value: w.open }));
+  const maxOpenWorkload = Math.max(1, ...workload.map((w) => w.open));
+
+  const pipelineDeals = deals.filter((d) => d.deal_value);
+  const convertedDeals = pipelineDeals.filter((d) => d.converted_at);
+  const conversionRate =
+    pipelineDeals.length > 0
+      ? Math.round((convertedDeals.length / pipelineDeals.length) * 100)
+      : 0;
+  const openPipelineValue = pipelineDeals
+    .filter((d) => !d.converted_at)
+    .reduce((sum, d) => sum + (d.deal_value ?? 0), 0);
+  const convertedValue = convertedDeals.reduce(
+    (sum, d) => sum + (d.deal_value ?? 0),
+    0,
+  );
+
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 sm:p-6">
       <div className="flex items-center justify-between gap-3">
@@ -267,6 +315,7 @@ export function CompanyDetail({
           <TabsTrigger value="meetings">{t("meetings")}</TabsTrigger>
           <TabsTrigger value="files">{t("files")}</TabsTrigger>
           <TabsTrigger value="finance">{tFinance("title")}</TabsTrigger>
+          <TabsTrigger value="analytics">{tAnalytics("title")}</TabsTrigger>
           <TabsTrigger value="team">{t("team")}</TabsTrigger>
         </TabsList>
 
@@ -518,6 +567,108 @@ export function CompanyDetail({
               ) : (
                 <EmptyState icon={Wallet} message={tFinance("emptyFinancialGoals")} />
               )}
+            </section>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="analytics">
+          <div className="flex flex-col gap-6">
+            <section>
+              <h2 className="mb-3 text-sm font-semibold text-foreground">
+                {tAnalytics("workloadTitle")}
+              </h2>
+              {workload.length > 0 ? (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+                    {workloadChartData.length > 0 ? (
+                      <HorizontalBarChart
+                        data={workloadChartData}
+                        maxValue={maxOpenWorkload}
+                      />
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        {tAnalytics("emptyWorkload")}
+                      </p>
+                    )}
+                  </div>
+                  <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">
+                    {workload.map((w) => (
+                      <li
+                        key={w.email}
+                        className="flex items-center gap-3 px-4 py-3"
+                      >
+                        <span className="flex-1 truncate text-sm text-foreground">
+                          {w.email}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {tAnalytics("openCount", { count: w.open })}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {tAnalytics("doneCount", { count: w.done })}
+                        </span>
+                        {w.overdue > 0 && (
+                          <span className="text-xs font-medium text-destructive">
+                            {tAnalytics("overdueCount", { count: w.overdue })}
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <EmptyState icon={ListTodo} message={tAnalytics("emptyWorkload")} />
+              )}
+            </section>
+
+            <section>
+              <h2 className="mb-3 text-sm font-semibold text-foreground">
+                {tAnalytics("conversionTitle")}
+              </h2>
+              {pipelineDeals.length > 0 ? (
+                <div className="grid gap-3 sm:grid-cols-4">
+                  <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+                    <p className="text-2xl font-semibold text-foreground">
+                      {pipelineDeals.length}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {tAnalytics("totalDeals")}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+                    <p className="text-2xl font-semibold text-emerald-600 dark:text-emerald-400">
+                      {conversionRate}%
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {tAnalytics("conversionRate")}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+                    <p className="text-2xl font-semibold text-foreground">
+                      {numberFormatter.format(openPipelineValue)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {tAnalytics("openPipelineValue")}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+                    <p className="text-2xl font-semibold text-emerald-600 dark:text-emerald-400">
+                      {numberFormatter.format(convertedValue)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {tAnalytics("convertedValue")}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <EmptyState icon={DollarSign} message={tAnalytics("emptyDeals")} />
+              )}
+            </section>
+
+            <section>
+              <h2 className="mb-3 text-sm font-semibold text-foreground">
+                {tAnalytics("activityTitle")}
+              </h2>
+              <ActivityFeed entries={activityLog} emailByUserId={emailByUserId} />
             </section>
           </div>
         </TabsContent>

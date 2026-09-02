@@ -26,6 +26,47 @@ function str(formData: FormData, key: string) {
   return typeof v === "string" && v.trim() !== "" ? v.trim() : null;
 }
 
+// PostgREST embeds a to-one relation as an object, but supabase-js's inferred
+// type (without regenerated DB types) can't distinguish that from a to-many
+// array — normalize both shapes defensively.
+function embeddedCompanyId(embedded: unknown): string | null {
+  if (!embedded) return null;
+  const row = Array.isArray(embedded) ? embedded[0] : embedded;
+  return (row as { company_id?: string | null } | undefined)?.company_id ?? null;
+}
+
+type ActivityActionType =
+  | "project_created"
+  | "task_created"
+  | "task_completed"
+  | "task_assigned"
+  | "deal_converted"
+  | "member_invited"
+  | "member_joined"
+  | "document_uploaded";
+
+// Best-effort: a logging failure must never break the underlying action it
+// documents, so errors are swallowed rather than thrown.
+async function logActivity(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  entry: {
+    companyId: string | null | undefined;
+    actorUserId: string;
+    actionType: ActivityActionType;
+    entityLabel: string;
+    metadata?: Record<string, unknown>;
+  },
+) {
+  if (!entry.companyId) return;
+  await supabase.from("activity_log").insert({
+    company_id: entry.companyId,
+    actor_user_id: entry.actorUserId,
+    action_type: entry.actionType,
+    entity_label: entry.entityLabel,
+    metadata: entry.metadata ?? null,
+  });
+}
+
 // --- Life areas ---
 
 export async function createLifeArea(formData: FormData) {
@@ -239,6 +280,13 @@ export async function createProject(formData: FormData) {
   });
   if (error) throw error;
 
+  await logActivity(supabase, {
+    companyId,
+    actorUserId: userId,
+    actionType: "project_created",
+    entityLabel: name,
+  });
+
   revalidatePath("/", "layout");
 }
 
@@ -329,6 +377,30 @@ export async function createTask(formData: FormData) {
   });
   if (error) throw error;
 
+  if (projectId) {
+    const { data: project } = await supabase
+      .from("projects")
+      .select("company_id")
+      .eq("id", projectId)
+      .single();
+    if (project?.company_id) {
+      await logActivity(supabase, {
+        companyId: project.company_id,
+        actorUserId: userId,
+        actionType: "task_created",
+        entityLabel: title,
+      });
+      if (assignedTo) {
+        await logActivity(supabase, {
+          companyId: project.company_id,
+          actorUserId: userId,
+          actionType: "task_assigned",
+          entityLabel: title,
+        });
+      }
+    }
+  }
+
   revalidatePath("/", "layout");
 }
 
@@ -347,16 +419,29 @@ export async function toggleTaskDone(taskId: string, done: boolean) {
 
 export async function updateTaskStatus(taskId: string, status: string) {
   const { supabase, userId } = await requireUserId();
-  const { error } = await supabase
+  const { data: updatedTask, error } = await supabase
     .from("tasks")
     .update({
       status,
       completed_at: status === "done" ? new Date().toISOString() : null,
     })
-    .eq("id", taskId);
+    .eq("id", taskId)
+    .select("title, projects(company_id)")
+    .single();
   if (error) throw error;
 
+  const companyId = embeddedCompanyId(updatedTask?.projects);
+
   if (status === "done") {
+    if (companyId) {
+      await logActivity(supabase, {
+        companyId,
+        actorUserId: userId,
+        actionType: "task_completed",
+        entityLabel: updatedTask.title,
+      });
+    }
+
     const { data: deal } = await supabase
       .from("deals")
       .select("id, company_id, deal_value, contact_name, converted_at")
@@ -388,6 +473,16 @@ export async function updateTaskStatus(taskId: string, status: string) {
           .from("deals")
           .update({ converted_at: new Date().toISOString() })
           .eq("id", deal.id);
+
+        if (deal.company_id) {
+          await logActivity(supabase, {
+            companyId: deal.company_id,
+            actorUserId: userId,
+            actionType: "deal_converted",
+            entityLabel: deal.contact_name ?? updatedTask.title,
+            metadata: { amount: deal.deal_value },
+          });
+        }
       }
     }
   }
@@ -431,7 +526,7 @@ export async function archiveTask(taskId: string) {
 }
 
 export async function updateTask(taskId: string, formData: FormData) {
-  const { supabase } = await requireUserId();
+  const { supabase, userId } = await requireUserId();
   const title = str(formData, "title");
   const dueDate = str(formData, "due_date");
   const priority = str(formData, "priority") ?? "medium";
@@ -449,12 +544,41 @@ export async function updateTask(taskId: string, formData: FormData) {
   // Only touch assigned_to when the form actually carries the field — the
   // area-level task editor doesn't show an assignee picker, and re-saving
   // from there must not silently clear an existing assignment.
-  if (formData.has("assigned_to")) {
-    updates.assigned_to = str(formData, "assigned_to");
+  const newAssignedTo = formData.has("assigned_to")
+    ? str(formData, "assigned_to")
+    : undefined;
+  if (newAssignedTo !== undefined) {
+    updates.assigned_to = newAssignedTo;
+  }
+
+  let previousAssignedTo: string | null = null;
+  let companyId: string | null = null;
+  if (newAssignedTo !== undefined) {
+    const { data: current } = await supabase
+      .from("tasks")
+      .select("assigned_to, projects(company_id)")
+      .eq("id", taskId)
+      .single();
+    previousAssignedTo = current?.assigned_to ?? null;
+    companyId = embeddedCompanyId(current?.projects);
   }
 
   const { error } = await supabase.from("tasks").update(updates).eq("id", taskId);
   if (error) throw error;
+
+  if (
+    newAssignedTo !== undefined &&
+    newAssignedTo !== previousAssignedTo &&
+    newAssignedTo &&
+    companyId
+  ) {
+    await logActivity(supabase, {
+      companyId,
+      actorUserId: userId,
+      actionType: "task_assigned",
+      entityLabel: title,
+    });
+  }
 
   revalidatePath("/", "layout");
 }
@@ -796,6 +920,13 @@ export async function uploadDocument(formData: FormData) {
     size_bytes: file.size,
   });
   if (error) throw error;
+
+  await logActivity(supabase, {
+    companyId,
+    actorUserId: userId,
+    actionType: "document_uploaded",
+    entityLabel: file.name,
+  });
 
   revalidatePath("/", "layout");
 }
@@ -1242,7 +1373,7 @@ export async function inviteMember(
   email: string,
   position: string,
 ) {
-  const { supabase } = await requireUserId();
+  const { supabase, userId } = await requireUserId();
   const trimmed = email.trim().toLowerCase();
   if (!trimmed) throw new Error("Email is required");
 
@@ -1254,6 +1385,14 @@ export async function inviteMember(
     position: position || "member",
   });
   if (error) throw error;
+
+  await logActivity(supabase, {
+    companyId,
+    actorUserId: userId,
+    actionType: "member_invited",
+    entityLabel: trimmed,
+  });
+
   revalidatePath("/companies", "layout");
 }
 
@@ -1317,7 +1456,7 @@ export async function claimTeamInvites() {
   const admin = createAdminClient();
   const { data: pending } = await admin
     .from("team_members")
-    .select("id")
+    .select("id, company_id")
     .eq("email", email)
     .eq("status", "invited")
     .is("user_id", null);
@@ -1334,6 +1473,15 @@ export async function claimTeamInvites() {
       "id",
       pending.map((p) => p.id),
     );
+
+  await admin.from("activity_log").insert(
+    pending.map((p) => ({
+      company_id: p.company_id,
+      actor_user_id: userId,
+      action_type: "member_joined" as const,
+      entity_label: email,
+    })),
+  );
 }
 
 export async function createProjectMessage(
