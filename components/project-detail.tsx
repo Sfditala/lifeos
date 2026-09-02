@@ -66,6 +66,13 @@ type Task = {
 };
 type Goal = { id: string; title: string };
 type Assignee = { id: string; email: string };
+type Deal = {
+  task_id: string;
+  contact_name: string | null;
+  channel: string | null;
+  deal_value: number | null;
+  last_contacted_at: string | null;
+};
 
 export function ProjectDetail({
   areaId,
@@ -77,6 +84,7 @@ export function ProjectDetail({
   links,
   companies,
   assignees,
+  deals,
   messages,
   currentUserId,
 }: {
@@ -89,6 +97,7 @@ export function ProjectDetail({
   links: ResolvedLink[];
   companies: Company[];
   assignees: Assignee[];
+  deals: Deal[];
   messages: Message[];
   currentUserId: string;
 }) {
@@ -255,6 +264,8 @@ export function ProjectDetail({
               tasks={tasks.map((t) => ({ ...t, project_id: project.id }))}
               assignees={assignees}
               projects={[{ id: project.id, name: project.name, life_area_id: areaId }]}
+              companyId={project.company_id ?? undefined}
+              deals={deals}
             />
           ) : (
             <ul className="divide-y divide-border rounded-lg border border-border bg-card shadow-sm">

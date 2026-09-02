@@ -374,6 +374,19 @@
     "projectCompletionChart": "Completion per project",
     "emptyTasks": "No tasks yet"
   },
+  "deals": {
+    "dealInfo": "Deal info",
+    "contactName": "Contact name",
+    "channel": "Channel",
+    "channel_whatsapp": "WhatsApp",
+    "channel_email": "Email",
+    "channel_linkedin": "LinkedIn",
+    "channel_phone": "Phone",
+    "channel_other": "Other",
+    "dealValue": "Deal value",
+    "lastContactedAt": "Last contacted",
+    "convertHint": "When this task moves to \"Done\", its deal value is automatically recorded as company income."
+  },
   "links": {
     "title": "Linked items",
     "addLink": "Link to another item",

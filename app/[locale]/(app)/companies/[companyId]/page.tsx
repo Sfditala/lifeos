@@ -49,6 +49,7 @@ export default async function CompanyPage({
     { data: accounts },
     { data: transactions },
     { data: financialGoals },
+    { data: dealRows },
   ] = await Promise.all([
     isOwner
       ? supabase
@@ -99,6 +100,14 @@ export default async function CompanyPage({
       .eq("company_id", companyId)
       .is("deleted_at", null)
       .order("created_at", { ascending: true }),
+    projectIds.length > 0
+      ? supabase
+          .from("deals")
+          .select(
+            "task_id, contact_name, channel, deal_value, last_contacted_at, tasks!inner(project_id)",
+          )
+          .in("tasks.project_id", projectIds)
+      : Promise.resolve({ data: [] }),
   ]);
 
   const assignees = (members ?? [])
@@ -125,6 +134,13 @@ export default async function CompanyPage({
         ...g,
         target_amount: Number(g.target_amount),
         current_amount: Number(g.current_amount),
+      }))}
+      deals={(dealRows ?? []).map((d) => ({
+        task_id: d.task_id,
+        contact_name: d.contact_name,
+        channel: d.channel,
+        deal_value: d.deal_value === null ? null : Number(d.deal_value),
+        last_contacted_at: d.last_contacted_at,
       }))}
     />
   );

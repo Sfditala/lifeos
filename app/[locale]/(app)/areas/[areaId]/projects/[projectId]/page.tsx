@@ -73,8 +73,26 @@ export default async function ProjectPage({
     authorLabel: string;
   }[] = [];
   let assignees: { id: string; email: string }[] = [];
+  let deals: {
+    task_id: string;
+    contact_name: string | null;
+    channel: string | null;
+    deal_value: number | null;
+    last_contacted_at: string | null;
+  }[] = [];
 
   if (project.company_id) {
+    const taskIds = (tasks ?? []).map((t) => t.id);
+    if (taskIds.length > 0) {
+      const { data: dealRows } = await supabase
+        .from("deals")
+        .select("task_id, contact_name, channel, deal_value, last_contacted_at")
+        .in("task_id", taskIds);
+      deals = (dealRows ?? []).map((d) => ({
+        ...d,
+        deal_value: d.deal_value === null ? null : Number(d.deal_value),
+      }));
+    }
     const [{ data: rawMessages }, { data: members }] = await Promise.all([
       supabase
         .from("project_messages")
@@ -109,6 +127,7 @@ export default async function ProjectPage({
       links={links}
       companies={companies ?? []}
       assignees={assignees}
+      deals={deals}
       messages={messages}
       currentUserId={currentUserId}
     />

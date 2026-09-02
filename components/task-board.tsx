@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { GripVertical } from "lucide-react";
 import {
   DndContext,
@@ -19,10 +19,17 @@ import { TASK_STATUS_STAGES, type TaskStatus } from "@/lib/tasks";
 import { formatDurationMinutes } from "@/lib/format-duration";
 import { PriorityBadge } from "@/components/status-badge";
 import { AddTaskDialog } from "@/components/add-task-dialog";
+import { DealDialog } from "@/components/deal-dialog";
 import { RowMenu } from "@/components/row-menu";
 
 type Assignee = { id: string; email: string };
 type ProjectRef = { id: string; name: string; life_area_id: string };
+type Deal = {
+  contact_name: string | null;
+  channel: string | null;
+  deal_value: number | null;
+  last_contacted_at: string | null;
+};
 type Task = {
   id: string;
   title: string;
@@ -68,6 +75,9 @@ function TaskCard({
   projects,
   assignees,
   showProjectBadge,
+  companyId,
+  deal,
+  numberFormatter,
 }: {
   task: Task;
   assignee: Assignee | undefined;
@@ -75,6 +85,9 @@ function TaskCard({
   projects: ProjectRef[];
   assignees: Assignee[];
   showProjectBadge: boolean;
+  companyId?: string;
+  deal: Deal | undefined;
+  numberFormatter: Intl.NumberFormat;
 }) {
   const tCommon = useTranslations("common");
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
@@ -110,6 +123,14 @@ function TaskCard({
           <GripVertical className="h-3.5 w-3.5" />
         </button>
         <p className="flex-1 text-sm font-medium text-foreground">{task.title}</p>
+        {companyId && (
+          <DealDialog
+            taskId={task.id}
+            companyId={companyId}
+            initial={deal}
+            hasValue={Boolean(deal?.deal_value)}
+          />
+        )}
         <RowMenu
           deleteTitle={tCommon("confirmDeleteTitle")}
           deleteImpact={tCommon("deleteSimpleImpact")}
@@ -137,6 +158,11 @@ function TaskCard({
               {project.name}
             </span>
           )}
+          {deal?.deal_value ? (
+            <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+              {numberFormatter.format(deal.deal_value)}
+            </span>
+          ) : null}
         </div>
         {assignee && <Avatar email={assignee.email} />}
       </div>
@@ -153,6 +179,9 @@ function Column({
   projects,
   assignees,
   showProjectBadge,
+  companyId,
+  dealByTaskId,
+  numberFormatter,
 }: {
   status: TaskStatus;
   label: string;
@@ -162,8 +191,15 @@ function Column({
   projects: ProjectRef[];
   assignees: Assignee[];
   showProjectBadge: boolean;
+  companyId?: string;
+  dealByTaskId: Map<string, Deal>;
+  numberFormatter: Intl.NumberFormat;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
+  const columnDealTotal = tasks.reduce(
+    (sum, task) => sum + (dealByTaskId.get(task.id)?.deal_value ?? 0),
+    0,
+  );
 
   return (
     <div
@@ -182,6 +218,11 @@ function Column({
           {tasks.length}
         </span>
       </div>
+      {companyId && columnDealTotal > 0 && (
+        <p className="-mt-2 px-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+          {numberFormatter.format(columnDealTotal)}
+        </p>
+      )}
       <div className="flex flex-col gap-2">
         {tasks.map((task) => (
           <TaskCard
@@ -192,6 +233,9 @@ function Column({
             projects={projects}
             assignees={assignees}
             showProjectBadge={showProjectBadge}
+            companyId={companyId}
+            deal={dealByTaskId.get(task.id)}
+            numberFormatter={numberFormatter}
           />
         ))}
       </div>
@@ -203,15 +247,24 @@ export function TaskBoard({
   tasks: initialTasks,
   assignees,
   projects,
+  companyId,
+  deals,
 }: {
   tasks: Task[];
   assignees: Assignee[];
   projects: ProjectRef[];
+  companyId?: string;
+  deals?: (Deal & { task_id: string })[];
 }) {
   const tStatus = useTranslations("status");
+  const locale = useLocale();
   const [tasks, setTasks] = useState(initialTasks);
   const [activeId, setActiveId] = useState<string | null>(null);
   const showProjectBadge = projects.length > 1;
+  const numberFormatter = useMemo(
+    () => new Intl.NumberFormat(locale === "ar" ? "ar-u-nu-latn" : "en"),
+    [locale],
+  );
 
   useEffect(() => {
     setTasks(initialTasks);
@@ -220,6 +273,10 @@ export function TaskBoard({
   const assigneeById = useMemo(
     () => new Map(assignees.map((a) => [a.id, a])),
     [assignees],
+  );
+  const dealByTaskId = useMemo(
+    () => new Map((deals ?? []).map((d) => [d.task_id, d])),
+    [deals],
   );
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -264,6 +321,9 @@ export function TaskBoard({
             projects={projects}
             assignees={assignees}
             showProjectBadge={showProjectBadge}
+            companyId={companyId}
+            dealByTaskId={dealByTaskId}
+            numberFormatter={numberFormatter}
           />
         ))}
       </div>
@@ -277,6 +337,9 @@ export function TaskBoard({
             projects={projects}
             assignees={assignees}
             showProjectBadge={showProjectBadge}
+            companyId={companyId}
+            deal={dealByTaskId.get(activeTask.id)}
+            numberFormatter={numberFormatter}
           />
         ) : null}
       </DragOverlay>

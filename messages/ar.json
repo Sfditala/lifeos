@@ -374,6 +374,19 @@
     "projectCompletionChart": "نسبة إنجاز كل مشروع",
     "emptyTasks": "لا يوجد مهام بعد"
   },
+  "deals": {
+    "dealInfo": "بيانات الصفقة",
+    "contactName": "اسم جهة الاتصال",
+    "channel": "قناة التواصل",
+    "channel_whatsapp": "واتساب",
+    "channel_email": "إيميل",
+    "channel_linkedin": "لينكدإن",
+    "channel_phone": "هاتف",
+    "channel_other": "أخرى",
+    "dealValue": "قيمة الصفقة",
+    "lastContactedAt": "آخر تواصل",
+    "convertHint": "لما تنقل هالمهمة لعمود \"منجز\"، قيمة الصفقة تُسجَّل تلقائيًا كحركة دخل بمالية الشركة."
+  },
   "links": {
     "title": "عناصر مرتبطة",
     "addLink": "اربط بعنصر آخر",

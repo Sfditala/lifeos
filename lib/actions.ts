@@ -346,7 +346,7 @@ export async function toggleTaskDone(taskId: string, done: boolean) {
 }
 
 export async function updateTaskStatus(taskId: string, status: string) {
-  const { supabase } = await requireUserId();
+  const { supabase, userId } = await requireUserId();
   const { error } = await supabase
     .from("tasks")
     .update({
@@ -354,6 +354,68 @@ export async function updateTaskStatus(taskId: string, status: string) {
       completed_at: status === "done" ? new Date().toISOString() : null,
     })
     .eq("id", taskId);
+  if (error) throw error;
+
+  if (status === "done") {
+    const { data: deal } = await supabase
+      .from("deals")
+      .select("id, company_id, deal_value, contact_name, converted_at")
+      .eq("task_id", taskId)
+      .maybeSingle();
+
+    if (deal && deal.deal_value && !deal.converted_at) {
+      const { data: account } = await supabase
+        .from("finance_accounts")
+        .select("id")
+        .is("deleted_at", null)
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (account) {
+        await supabase.from("transactions").insert({
+          user_id: userId,
+          account_id: account.id,
+          company_id: deal.company_id,
+          amount: deal.deal_value,
+          direction: "in",
+          category: "مبيعات",
+          source: "business",
+          occurred_at: new Date().toISOString().slice(0, 10),
+          note: deal.contact_name,
+        });
+        await supabase
+          .from("deals")
+          .update({ converted_at: new Date().toISOString() })
+          .eq("id", deal.id);
+      }
+    }
+  }
+
+  revalidatePath("/", "layout");
+}
+
+export async function upsertDeal(taskId: string, formData: FormData) {
+  const { supabase, userId } = await requireUserId();
+  const companyId = str(formData, "company_id");
+  const contactName = str(formData, "contact_name");
+  const channel = str(formData, "channel");
+  const dealValueRaw = str(formData, "deal_value");
+  const dealValue = dealValueRaw ? Number(dealValueRaw) : null;
+  const lastContactedAt = str(formData, "last_contacted_at");
+
+  const { error } = await supabase.from("deals").upsert(
+    {
+      user_id: userId,
+      task_id: taskId,
+      company_id: companyId,
+      contact_name: contactName,
+      channel,
+      deal_value: dealValue,
+      last_contacted_at: lastContactedAt,
+    },
+    { onConflict: "task_id" },
+  );
   if (error) throw error;
   revalidatePath("/", "layout");
 }

@@ -93,6 +93,13 @@ type FinancialGoal = {
   current_amount: number;
   target_date: string | null;
 };
+type Deal = {
+  task_id: string;
+  contact_name: string | null;
+  channel: string | null;
+  deal_value: number | null;
+  last_contacted_at: string | null;
+};
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -111,6 +118,7 @@ export function CompanyDetail({
   accounts,
   transactions,
   financialGoals,
+  deals,
 }: {
   company: Company;
   isOwner: boolean;
@@ -124,6 +132,7 @@ export function CompanyDetail({
   accounts: Account[];
   transactions: Transaction[];
   financialGoals: FinancialGoal[];
+  deals: Deal[];
 }) {
   const t = useTranslations("team");
   const tAreas = useTranslations("areas");
@@ -336,7 +345,13 @@ export function CompanyDetail({
             <AddTaskDialog projects={projectRefs} assignees={assignees} />
           </div>
           {tasks.length > 0 ? (
-            <TaskBoard tasks={tasks} assignees={assignees} projects={projectRefs} />
+            <TaskBoard
+              tasks={tasks}
+              assignees={assignees}
+              projects={projectRefs}
+              companyId={company.id}
+              deals={deals}
+            />
           ) : (
             <EmptyState icon={ListTodo} message={t("emptyTasks")} />
           )}
